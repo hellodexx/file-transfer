@@ -16,8 +16,8 @@ C++ file transfer application for Linux, macOS, Android, iOS, and WSL.
 ## Build
 ### Build for PC
 ```bash
-git clone https://github.com/dexalberto/cpp-fast-file-transfer-tool.git
-cd cpp-fast-file-transfer-tool
+git clone https://github.com/hellodexx/file-transfer.git
+cd file-transfer
 make clean
 make
 ```
