@@ -107,28 +107,37 @@ void FileTransferClient::receiveFile(int serverSocket) {
 		return;
 	}
 
-	// Open a file where to save the content
-	std::ofstream file(fileName, std::ios::out | std::ios::binary);
+	// Open a file for writing
+	FILE *file = fopen(fileName, "wb");
 	if (!file) {
-		LOGE("Could not create file: %s", fileName);
+		LOGE("Error opening file");
 		return;
 	}
 
 	// Receive the content of the file
 	LOGD("Receiving file content");
-	char buffer[BUFFER_SIZE] = {0};
-	int bytesRead;
+	unsigned char buffer[BUFFER_SIZE] = {0};
+	ssize_t bytesRecvd = 0;
 	long long totalBytes = 0;
-	while ((bytesRead = recv(serverSocket, buffer, BUFFER_SIZE, 0)) > 0) {
-		totalBytes += bytesRead;
-		file.write(buffer, bytesRead);
-		if (totalBytes >= fileSize)
+	while (true) {
+		memset(buffer, 0, BUFFER_SIZE);
+		bytesRecvd = recv(serverSocket, buffer, BUFFER_SIZE, 0);
+		totalBytes += bytesRecvd;
+		if (bytesRecvd <= 0) {
+			LOGE("Error on read");
 			break;
-	}
+		}
 
+		fwrite(buffer, 1, bytesRecvd, file);
+
+		if (totalBytes >= fileSize) {
+			break;
+		}
+	}
+	
 	// Close the file
 	LOGD("Closing file");
-	file.close();
+	fclose(file);
 
 	// Copy original file timestamp
 	LOGD("Copying original time stamp");

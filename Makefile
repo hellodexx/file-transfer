@@ -48,6 +48,11 @@ else ifeq ($(OS_NAME),darwin)
 NDK_PATH := ~/Library/Android/sdk/ndk/26.1.10909125/
 endif
 
+# Set OS name to 'windows' if Android sdk/ndk is on WSL
+ifeq ($(shell grep -qEi "(microsoft|wsl)" /proc/version && echo WSL), WSL)
+OS_NAME := windows
+endif
+
 # Set the Android API level to compile against
 ANDROID_API_LEVEL := 24
 # Set the target architecture (armeabi-v7a, arm64-v8a, x86, x86_64)
@@ -90,7 +95,9 @@ android_libs:
 	make android_copy
 
 android_copy:
-	cp -r lib/ android/DexFileTransfer/app/src/main/cpp/libs/
+	mkdir -p android/DexFileTransfer/app/src/main/cpp/libs/
+	mkdir -p android/DexFileTransfer/app/src/main/cpp/include/
+	cp -r lib/* android/DexFileTransfer/app/src/main/cpp/libs/
 	cp include/* android/DexFileTransfer/app/src/main/cpp/include/
 
 $(BIN): $(OBJ) | $(BIN_DIR)

@@ -28,9 +28,12 @@ class MainActivity : AppCompatActivity() {
         val localIpAddress = getLocalIpAddress(this)
         binding.sampleText.text = "Local IP Address: $localIpAddress"
 
-        requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES,
+        requestPermissions(arrayOf(
+            Manifest.permission.READ_MEDIA_IMAGES,
             Manifest.permission.READ_MEDIA_VIDEO,
-            Manifest.permission.READ_EXTERNAL_STORAGE), 0) // Add checking
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_MEDIA_LOCATION),
+            0) // Add checking
 
         GlobalScope.launch(Dispatchers.IO) {
             runDexFileTransferServerJNI()

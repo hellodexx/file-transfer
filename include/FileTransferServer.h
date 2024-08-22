@@ -1,6 +1,7 @@
 #ifndef FILETRANSFERSERVER_H
 #define FILETRANSFERSERVER_H
 #include <string>
+#include <vector>
 
 namespace Dex {
 

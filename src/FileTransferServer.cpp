@@ -199,25 +199,31 @@ void FileTransferServer::sendFile(int clientSocket, const char* filename) {
 	LOGD("bytesSent: %d", bytesSent);
 
 	// Open file for reading
-	std::ifstream file(filename, std::ios::in | std::ios::binary);
+	FILE *file = fopen(filename, "rb");
 	if (!file) {
-		LOGE("File not found: %s", filename);
+		LOGE("Error opening file");
 		return;
 	}
-
 	// Send file content
-	LOGD("Sending file content");
-	char buffer[BUFFER_SIZE] = {0};
-	while (!file.eof()) {
-		// Read the file
-		file.read(buffer, BUFFER_SIZE);
-		int bytesRead = file.gcount();
-		// Send data to client
-		send(clientSocket, buffer, bytesRead, 0);
+	LOGI("Sending file content");
+	unsigned char buffer[BUFFER_SIZE] = {0};
+	size_t bytesRead = 0;
+
+	while (true) {
+		// LOGI("while");
+		memset(buffer, 0, BUFFER_SIZE);
+		bytesRead = fread(buffer, 1, BUFFER_SIZE, file);
+		if (bytesRead <= 0)
+			break;
+		ssize_t bytesSent = send(clientSocket, buffer, bytesRead, 0);
+		if (bytesSent == -1) {
+			LOGE("Error sending data");
+			break;
+		}
 	}
 
 	// Close the file
-	file.close();
+	fclose(file);
 
 	sentFilesCounter += 1;
 	LOGI("File sent: %d/%d %s", sentFilesCounter, noOfFilesToSend,
