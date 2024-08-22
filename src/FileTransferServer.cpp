@@ -25,8 +25,16 @@ namespace Dex {
 #define FILENAME_SIZE 1024
 #define CHUNK_SIZE 1024
 
+FileTransferServer::FileTransferServer() : serverSocket(-1) {
+}
+
+FileTransferServer::~FileTransferServer() {
+	if (serverSocket != -1) {
+		close(serverSocket);
+	}
+}
+
 void FileTransferServer::runServer() {
-	int serverSocket;
 	struct sockaddr_in serverAddr, clientAddr;
 	socklen_t addrLen = sizeof(clientAddr);
 	int opt = 1;
@@ -77,6 +85,7 @@ void FileTransferServer::runServer() {
 	LOGI("Server is listening on port %d", DEFAULT_PORT);
 
 	while (true) {
+		// Accept a new connection
 		int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr,
 		                   &addrLen);
 		if (clientSocket < 0) {
@@ -86,88 +95,75 @@ void FileTransferServer::runServer() {
 		}
 		LOGI("New client connection");
 
-		noOfFilesToSend = 0;
-		sentFilesCounter = 0;
-
-		clientThreads.emplace_back([clientSocket, this]() {
-			char filename[FILENAME_SIZE] = {0};
-
-			// Receive file name from client
-			if (recv(clientSocket, filename, FILENAME_SIZE, 0) < 0) {
-				LOGE("Receive file name failed: %s", strerror(errno));
-				close(clientSocket);
-				return;
-			}
-			LOGD("Received file name: %s", filename);
-
-			std::vector<std::string> files;
-
-			if (isFilePattern(filename)) {
-				// Find matching files
-				LOGI("Finding matching files: %s", filename);
-				std::string filenameStr(filename);
-				files = getMatchingFiles(filenameStr);
-				noOfFilesToSend = files.size();
-			} else {
-				LOGI("Finding file: %s", filename);
-				if (fileExists(filename)) {
-					noOfFilesToSend = 1;
-				}
-			}
-
-			// Send number of files to client
-			LOGD("Sending number of file(s): %d", noOfFilesToSend);
-			if (send(clientSocket, &noOfFilesToSend, sizeof(noOfFilesToSend), 0) < 0) {
-				LOGE("Sending number of files failed: %s", strerror(errno));
-				close(clientSocket);
-				return;
-			}
-
-			if (noOfFilesToSend == 0) {
-				LOGE("No file(s) found: %s", filename);
-				close(clientSocket);
-				return;
-			}
-
-			if (noOfFilesToSend == 1) {
-				// Send a single file to client
-				LOGD("Sending file: %s", filename);
-				sendFile(clientSocket, filename);
-			} else {
-				// Iterate files
-				for (const auto& file : files) {
-					// Send file to client
-					LOGD("Sending file: %s", file.c_str());
-					sendFile(clientSocket, file.c_str());
-				}
-			}
-
-			LOGI("Total sent files: %d", sentFilesCounter);
-			LOGI("Closing client connection");
-			close(clientSocket);
-		});
-
-		// Remove the last added thread
-		if (!clientThreads.empty()) {
-			clientThreads.back().join(); // Ensure the thread is joined before removing
-			clientThreads.pop_back(); // Remove the last thread
-		}
-	}
-
-	// Optionally, join all client threads
-	for (auto& thread : clientThreads) {
-		if (thread.joinable()) {
-			thread.join();
-		}
+		std::thread clientThread(&FileTransferServer::handleClient, this, clientSocket);
+		clientThread.detach();
 	}
 
 	LOGI("Closing server socket");
 	close(serverSocket);
 }
 
-int FileTransferServer::sendFile(int clientSocket, const char* filename) {
-	std::string filenameStr = filename;
+void FileTransferServer::handleClient(int clientSocket) {
+	char filename[FILENAME_SIZE] = {0};
+	std::vector<std::string> files;
+	noOfFilesToSend = 0;
+	sentFilesCounter = 0;
 
+	// Receive file name from client
+	if (recv(clientSocket, filename, FILENAME_SIZE, 0) < 0) {
+		LOGE("Receive file name failed: %s", strerror(errno));
+		close(clientSocket);
+		return;
+	}
+	LOGD("Received file name: %s", filename);
+
+	if (isFilePattern(filename)) {
+		// Find matching files
+		LOGI("Finding matching files: %s", filename);
+		std::string filenameStr(filename);
+		files = getMatchingFiles(filenameStr);
+		noOfFilesToSend = files.size();
+	} else {
+		LOGI("Finding file: %s", filename);
+		if (fileExists(filename)) {
+			noOfFilesToSend = 1;
+		}
+	}
+
+	// Send number of files to client
+	LOGD("Sending number of file(s): %d", noOfFilesToSend);
+	if (send(clientSocket, &noOfFilesToSend, sizeof(noOfFilesToSend), 0) < 0) {
+		LOGE("Sending number of files failed: %s", strerror(errno));
+		close(clientSocket);
+		return;
+	}
+
+	if (noOfFilesToSend == 0) {
+		LOGE("No file(s) found: %s", filename);
+		close(clientSocket);
+		return;
+	}
+
+	if (noOfFilesToSend == 1) {
+		// Send a single file to client
+		LOGD("Sending file: %s", filename);
+		sendFile(clientSocket, filename);
+	} else {
+		// Iterate files
+		for (const auto& file : files) {
+			// Send file to client
+			LOGD("Sending file: %s", file.c_str());
+			sendFile(clientSocket, file.c_str());
+		}
+	}
+
+
+	LOGI("Total sent files: %d", sentFilesCounter);
+	LOGI("Closing client connection");
+	close(clientSocket);
+}
+
+int FileTransferServer::sendFile(int clientSocket, const char *filename) {
 	// Wait for client start signal
 	LOGD("Waiting for start signal");
 	short startSignal = 0;
@@ -177,6 +173,7 @@ int FileTransferServer::sendFile(int clientSocket, const char* filename) {
 	}
 
 	// Send base file name
+    std::string filenameStr = filename;
 	std::string baseName = getBaseName(filenameStr);
 	LOGD("Base file name: %s", baseName.c_str());
 	if (send(clientSocket, baseName.c_str(), 100, 0) < 0) {

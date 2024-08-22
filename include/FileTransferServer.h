@@ -7,8 +7,12 @@ namespace Dex {
 
 class FileTransferServer {
 public:
+	FileTransferServer();
+	~FileTransferServer();
+
 	void runServer();
 private:
+	void handleClient(int clientSocket);
 	int sendFile(int clientSocket, const char* filename);
 	bool isFilePattern(const char* filename);
 	std::string getBaseName(const std::string& path);
@@ -17,6 +21,7 @@ private:
 	std::vector<std::string> getMatchingFiles(const std::string& filestr);
 	bool fileExists(const char *path);
 
+	int serverSocket;
 	unsigned noOfFilesToSend = 0;
 	unsigned sentFilesCounter = 0;
 };
