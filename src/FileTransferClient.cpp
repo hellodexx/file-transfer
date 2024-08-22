@@ -18,7 +18,7 @@ namespace Dex {
 #define FILENAME_SIZE 1024
 #define CHUNK_SIZE 1024
 
-void FileTransferClient::runClient(const char* serverIp, const char* filename) {
+void FileTransferClient::runClient(const char* serverIp, const char* filename, command cmd) {
 	int serverSocket;
 	struct sockaddr_in serverAddr;
 	noOfFilesToRecv = 0;
@@ -40,6 +40,14 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename) {
 	if (connect(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))
 	    < 0) {
 		LOGE("Connection failed: %s", strerror(errno));
+		return;
+	}
+
+	// Send command to server
+	LOGI("Command: %d", static_cast<int>(cmd));
+	if (send(serverSocket, &cmd, sizeof(cmd), 0) < 0) {
+		LOGE("Send command failed: %s", strerror(errno));
+		close(serverSocket);
 		return;
 	}
 
@@ -67,12 +75,18 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename) {
 
 	LOGD("noOfFilesToRecv: %d", noOfFilesToRecv);
 
-	for (size_t i = 0; i < noOfFilesToRecv; i++) {	
-		// Receive the file and save to local
-		receiveFile(serverSocket);
+	if (cmd == FileTransferClient::command::PULL) {
+		for (size_t i = 0; i < noOfFilesToRecv; i++) {	
+			// Receive the file and save to local
+			receiveFile(serverSocket);
+			LOGI("Total received files: %d ", recvdFilesCounter);
+
+		}
+	} else if (cmd == FileTransferClient::command::LIST) {
+		receiveFileList(serverSocket);
+		LOGI("Total received files: %d ", noOfFilesToRecv);
 	}
 
-	LOGI("Total received files: %d ", recvdFilesCounter);
 	LOGI("Closing connection");
 	close(serverSocket);
 	LOGI("Exiting");
@@ -158,6 +172,35 @@ int FileTransferClient::receiveFile(int serverSocket) {
 	recvdFilesCounter += 1;
 	LOGI("File received: %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
 	      fileName);
+
+	return 0;
+}
+
+int FileTransferClient::receiveFileList(int serverSocket) {
+	char buffer[CHUNK_SIZE] = {0};
+
+	// Send start signal to server
+	LOGD("Sending start signal");
+	short startSignal = 0;
+	if (send(serverSocket, &startSignal, sizeof(startSignal), 0) < 0) {
+		LOGE("Send start signal failed: %s", strerror(errno));
+		return -1;
+	}
+
+	// Receive file list
+	LOGD("Receiving file list");
+	while (true) {
+		memset(buffer, 0, sizeof(buffer));
+		size_t bytesRecv;
+		if ((bytesRecv = recv(serverSocket, buffer, CHUNK_SIZE, 0)) < 0) {
+			break;
+		}
+		if (bytesRecv) {
+			LOGI("Receive: %s", buffer);
+		} else {
+			break;
+		}
+	}
 
 	return 0;
 }

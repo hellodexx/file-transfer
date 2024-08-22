@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
 	int option_index = 0;
 	std::string serverIp;
 	std::string pattern;
+	std::string listPattern;
 	Dex::FileTransferServer ftServer;
 	Dex::FileTransferClient ftClient;
 
@@ -49,7 +50,8 @@ int main(int argc, char* argv[]) {
 		{0, 0, 0, 0} // This marks the end of the array
 	};
 
-	while ((opt = getopt_long(argc, argv, "hvsci:p:l:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvsci:p:l:", long_options,
+	       &option_index)) != -1) {
 		switch (opt) {
 			case 'h':
 				std::cout << "Help option\n";
@@ -76,6 +78,7 @@ int main(int argc, char* argv[]) {
 				break;
 			case 'l':
 				std::cout << "List: " << optarg << "\n";
+				listPattern = optarg;
 				break;
 			case '?':
 				// getopt_long already prints an error message
@@ -99,11 +102,26 @@ int main(int argc, char* argv[]) {
 			printf("-i is required!\n");
 			printUsage();
 		}
-		if (pattern.empty()) {
-			printf("-p is required!\n");
+
+		if (pattern.empty() && listPattern.empty()) {
+			printf("-p or -l is required");
 			printUsage();
 		}
-		ftClient.runClient(serverIp.c_str(), pattern.c_str());
+
+		if (!pattern.empty() && !listPattern.empty()) {
+			printf("-p or -l conflict");
+			printUsage();
+		}
+	
+		if (pattern.size()) {
+			ftClient.runClient(serverIp.c_str(), pattern.c_str(),
+			                   Dex::FileTransferClient::command::PULL);
+		}
+
+		if (listPattern.size()) {
+			ftClient.runClient(serverIp.c_str(), listPattern.c_str(),
+			                   Dex::FileTransferClient::command::LIST);
+		}
 	} else {
 		printUsage();
 	}

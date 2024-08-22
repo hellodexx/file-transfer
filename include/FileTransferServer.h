@@ -7,6 +7,12 @@ namespace Dex {
 
 class FileTransferServer {
 public:
+	enum class command {
+		PULL,
+		LIST,
+		INVALID
+	};
+
 	FileTransferServer();
 	~FileTransferServer();
 
@@ -14,6 +20,7 @@ public:
 private:
 	void handleClient(int clientSocket);
 	int sendFile(int clientSocket, const char* filename);
+	int sendFileList(int clientSocket, std::vector<std::string> files);
 	bool isFilePattern(const char* filename);
 	std::string getBaseName(const std::string& path);
 	void splitPathAndPattern(const std::string& filestr, std::string& directory,

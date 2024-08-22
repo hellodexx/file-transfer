@@ -108,6 +108,15 @@ void FileTransferServer::handleClient(int clientSocket) {
 	std::vector<std::string> files;
 	noOfFilesToSend = 0;
 	sentFilesCounter = 0;
+	Dex::FileTransferServer::command cmd;
+
+	// Receive command
+	if (recv(clientSocket, &cmd, sizeof(cmd), 0) < 0) {
+		LOGE("Receive command failed: %s", strerror(errno));
+		close(clientSocket);
+		return;
+	}
+	LOGD("Received command: %d", static_cast<int>(cmd));
 
 	// Receive file name from client
 	if (recv(clientSocket, filename, FILENAME_SIZE, 0) < 0) {
@@ -144,19 +153,22 @@ void FileTransferServer::handleClient(int clientSocket) {
 		return;
 	}
 
-	if (noOfFilesToSend == 1) {
-		// Send a single file to client
-		LOGD("Sending file: %s", filename);
-		sendFile(clientSocket, filename);
+	if (cmd == Dex::FileTransferServer::command::LIST) {
+		sendFileList(clientSocket, files);
 	} else {
-		// Iterate files
-		for (const auto& file : files) {
-			// Send file to client
-			LOGD("Sending file: %s", file.c_str());
-			sendFile(clientSocket, file.c_str());
+		if (noOfFilesToSend == 1) {
+			// Send a single file to client
+			LOGD("Sending file: %s", filename);
+			sendFile(clientSocket, filename);
+		} else {
+			// Iterate files
+			for (const auto& file : files) {
+				// Send file to client
+				LOGD("Sending file: %s", file.c_str());
+				sendFile(clientSocket, file.c_str());
+			}
 		}
 	}
-
 
 	LOGI("Total sent files: %d", sentFilesCounter);
 	LOGI("Closing client connection");
@@ -242,6 +254,31 @@ int FileTransferServer::sendFile(int clientSocket, const char *filename) {
 	fclose(file);
 
 	LOGI("File sent: %d/%d %s", sentFilesCounter, noOfFilesToSend, filename);
+	return 0;
+}
+
+int FileTransferServer::sendFileList(int clientSocket, std::vector<std::string> files) {
+	// Wait for client start signal
+	LOGD("Waiting for start signal");
+	short startSignal = 0;
+	if (recv(clientSocket, &startSignal, sizeof(startSignal), 0) < 0) {
+		LOGE("Receive start signal failed: %s", strerror(errno));
+		return -1;
+	}
+
+	// Iterate files
+	for (const auto& file : files) {
+		// Send file list to client
+		std::string fileStr = file + "\n";
+		if (send(clientSocket, fileStr.c_str(), fileStr.length(), 0) < 0) {
+			LOGE("Send file list failed: %s", strerror(errno));
+			return -1;
+		}
+		LOGD("Sent: %s", fileStr.c_str());
+		sentFilesCounter += 1;
+	}
+
+	LOGI("File list sent completed");
 	return 0;
 }
 
