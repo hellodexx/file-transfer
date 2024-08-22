@@ -1,6 +1,7 @@
 package com.example.dexfiletransfer
 
 import android.Manifest
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
@@ -8,6 +9,9 @@ import com.example.dexfiletransfer.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+
+import android.net.wifi.WifiManager
+import android.text.format.Formatter
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,15 +25,25 @@ class MainActivity : AppCompatActivity() {
 
         // Example of a call to a native method
 //        binding.sampleText.text = stringFromJNI()
-        binding.sampleText.text = "Hello World!"
+        val localIpAddress = getLocalIpAddress(this)
+        binding.sampleText.text = "Local IP Address: $localIpAddress"
 
-        requestPermissions(arrayOf(Manifest.permission.READ_MEDIA_IMAGES,
+        requestPermissions(arrayOf(
+            Manifest.permission.READ_MEDIA_IMAGES,
             Manifest.permission.READ_MEDIA_VIDEO,
-            Manifest.permission.READ_EXTERNAL_STORAGE), 0) // Add checking
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_MEDIA_LOCATION),
+            0) // Add checking
 
         GlobalScope.launch(Dispatchers.IO) {
             runDexFileTransferServerJNI()
         }
+    }
+
+    fun getLocalIpAddress(context: Context): String {
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val ipAddress = wifiManager.connectionInfo.ipAddress
+        return Formatter.formatIpAddress(ipAddress)
     }
 
     /**

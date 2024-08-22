@@ -5,9 +5,16 @@ namespace Dex {
 
 class FileTransferClient {
 public:
-	void runClient(const char* serverIp, const char* filename);
+	enum class command {
+		PULL,
+		LIST,
+		INVALID
+	};
+
+	void runClient(const char* serverIp, const char* filename, command cmd);
 private:
-	void receiveFile(int serverSocket);
+	int receiveFile(int serverSocket);
+	int receiveFileList(int serverSocket);
 	unsigned noOfFilesToRecv = 0;
 	unsigned recvdFilesCounter = 0;
 };
