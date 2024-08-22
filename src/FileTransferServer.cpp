@@ -20,8 +20,10 @@
 
 namespace Dex {
 
-#define PORT 9413
-#define BUFFER_SIZE 1024
+#define DEFAULT_PORT 9413
+#define MAX_CLIENTS 10
+#define FILENAME_SIZE 1024
+#define CHUNK_SIZE 1024
 
 void FileTransferServer::runServer() {
 	int serverSocket;
@@ -30,30 +32,34 @@ void FileTransferServer::runServer() {
 	int opt = 1;
 	std::vector<std::thread> clientThreads;
 
+	// Create socket file descriptor
 	serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1) {
 		LOGE("Socket creation failed: %s", strerror(errno));
 		return;
 	}
 
+	// Attach socket to the port
 #ifdef __APPLE__
 	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
 		LOGE("Set socket options failed: %s", strerror(errno));
 		close(serverSocket);
+		return;
 	}
 #else
 	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
 	    sizeof(opt))) {
 		LOGE("Set socket options failed: %s", strerror(errno));
 		close(serverSocket);
+		return;
 	}
 #endif
 
 	serverAddr.sin_family = AF_INET;
-	serverAddr.sin_addr.s_addr = INADDR_ANY; // Use INADDR_ANY to bind to all
-	                                         // interfaces
-	serverAddr.sin_port = htons(PORT);
+	serverAddr.sin_addr.s_addr = INADDR_ANY; // Use INADDR_ANY to bind to all interfaces
+	serverAddr.sin_port = htons(DEFAULT_PORT);
 
+	// Bind the socket to the network address and port
 	if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))
 	    < 0) {
 		LOGE("Bind failed: %s", strerror(errno));
@@ -61,13 +67,14 @@ void FileTransferServer::runServer() {
 		return;
 	}
 
-	if (listen(serverSocket, 3) < 0) {
+	// Start listening for connections
+	if (listen(serverSocket, MAX_CLIENTS) < 0) {
 		LOGE("Listen failed: %s", strerror(errno));
 		close(serverSocket);
 		return;
 	}
 
-	LOGI("Server is listening on port %d", PORT);
+	LOGI("Server is listening on port %d", DEFAULT_PORT);
 
 	while (true) {
 		int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr,
@@ -83,59 +90,66 @@ void FileTransferServer::runServer() {
 		sentFilesCounter = 0;
 
 		clientThreads.emplace_back([clientSocket, this]() {
-			char filename[BUFFER_SIZE] = {0};
+			char filename[FILENAME_SIZE] = {0};
 
 			// Receive file name from client
-			recv(clientSocket, filename, BUFFER_SIZE, 0);
-			LOGD("File name = %s", filename);
+			if (recv(clientSocket, filename, FILENAME_SIZE, 0) < 0) {
+				LOGE("Receive file name failed: %s", strerror(errno));
+				close(clientSocket);
+				return;
+			}
+			LOGD("Received file name: %s", filename);
 
-			// Check if multiple files pattern
-			if (isMultipleFiles(filename)) {
+			std::vector<std::string> files;
+
+			if (isFilePattern(filename)) {
+				// Find matching files
+				LOGI("Finding matching files: %s", filename);
 				std::string filenameStr(filename);
-
-				LOGI("Getting files with pattern: %s", filename);
-				// Check matching files and save to list
-				std::vector<std::string> files = getMatchingFiles(filenameStr);
-
-				// Send number of files client
+				files = getMatchingFiles(filenameStr);
 				noOfFilesToSend = files.size();
-
-				LOGD("Sending number of files: %d", noOfFilesToSend);
-				send(clientSocket, &noOfFilesToSend, sizeof(noOfFilesToSend), 0);
-
-				if (noOfFilesToSend == 0) {
-					LOGE("No files found with pattern: %s", filename);
-					close(clientSocket);
-					return;
+			} else {
+				LOGI("Finding file: %s", filename);
+				if (fileExists(filename)) {
+					noOfFilesToSend = 1;
 				}
+			}
 
+			// Send number of files to client
+			LOGD("Sending number of file(s): %d", noOfFilesToSend);
+			if (send(clientSocket, &noOfFilesToSend, sizeof(noOfFilesToSend), 0) < 0) {
+				LOGE("Sending number of files failed: %s", strerror(errno));
+				close(clientSocket);
+				return;
+			}
+
+			if (noOfFilesToSend == 0) {
+				LOGE("No file(s) found: %s", filename);
+				close(clientSocket);
+				return;
+			}
+
+			if (noOfFilesToSend == 1) {
+				// Send a single file to client
+				LOGD("Sending file: %s", filename);
+				sendFile(clientSocket, filename);
+			} else {
 				// Iterate files
 				for (const auto& file : files) {
-					LOGD("file: %s", file.c_str());
 					// Send file to client
+					LOGD("Sending file: %s", file.c_str());
 					sendFile(clientSocket, file.c_str());
 				}
-			} else {
-				LOGD("Single file");
-				// Send number of files to send to client
-				noOfFilesToSend = 1;
-				LOGD("Sending number of files: %d", noOfFilesToSend);
-				send(clientSocket, &noOfFilesToSend, sizeof(noOfFilesToSend), 0);
-
-				// Send file to client
-				sendFile(clientSocket, filename);
 			}
 
 			LOGI("Total sent files: %d", sentFilesCounter);
-
 			LOGI("Closing client connection");
 			close(clientSocket);
 		});
 
 		// Remove the last added thread
 		if (!clientThreads.empty()) {
-			clientThreads.back().join(); // Ensure the thread is joined before
-			                             // removing
+			clientThreads.back().join(); // Ensure the thread is joined before removing
 			clientThreads.pop_back(); // Remove the last thread
 		}
 	}
@@ -151,20 +165,30 @@ void FileTransferServer::runServer() {
 	close(serverSocket);
 }
 
-void FileTransferServer::sendFile(int clientSocket, const char* filename) {
+int FileTransferServer::sendFile(int clientSocket, const char* filename) {
 	std::string filenameStr = filename;
-	int bytesSent = 0;
 
 	// Wait for client start signal
 	LOGD("Waiting for start signal");
 	short startSignal = 0;
-	recv(clientSocket, &startSignal, sizeof(startSignal), 0);
+	if (recv(clientSocket, &startSignal, sizeof(startSignal), 0) < 0) {
+		LOGE("Receive start signal failed: %s", strerror(errno));
+		return -1;
+	}
 
-	// Open the file
+	// Send base file name
+	std::string baseName = getBaseName(filenameStr);
+	LOGD("Base file name: %s", baseName.c_str());
+	if (send(clientSocket, baseName.c_str(), 100, 0) < 0) {
+		LOGE("Send file name failed: %s", strerror(errno));
+		return -1;
+	}
+
+	// Open file descriptor
 	int fd = open(filename, O_RDONLY);
 	if (fd == -1) {
 		LOGE("Error opening file: %s", strerror(errno));
-		return;
+		return -1;
 	}
 
 	// Retrieve file information
@@ -172,52 +196,47 @@ void FileTransferServer::sendFile(int clientSocket, const char* filename) {
 	if (fstat(fd, &file_stat) < 0) {
 		LOGE("Error getting file information: %s", strerror(errno));
 		close(fd);
-		return;
+		return -1;
 	}
-
-	// Send file name
-	std::string baseName = getBaseName(filenameStr);
-	LOGD("Base file name: %s", baseName.c_str());
-	bytesSent = send(clientSocket, baseName.c_str(), 100, 0);
-	LOGD("bytesSent: %d", bytesSent);
 
 	// Send file size
 	long long fileSize = file_stat.st_size;
 	LOGD("Sending file size: %lld", fileSize);
-	bytesSent = send(clientSocket, &fileSize, sizeof(fileSize), 0);
-	LOGD("bytesSent: %d", bytesSent);
+	if (send(clientSocket, &fileSize, sizeof(fileSize), 0) < 0) {
+		LOGE("Send file size failed: %s", strerror(errno));
+		return -1;
+	}
 
 	// Send file timestamp
 	LOGD("Sending file timestamp");
 	time_t file_time = file_stat.st_mtime;
-	bytesSent = send(clientSocket, &file_time, sizeof(time_t), 0);
-	if (bytesSent != sizeof(time_t)) {
-		LOGE("Error sending file timestamp");
-		close(fd);
-		return;
+	if (send(clientSocket, &file_time, sizeof(time_t), 0) != sizeof(time_t)) {
+		LOGE("Send file timestamp failed: %s", strerror(errno));
+		return -1;
 	}
-	LOGD("bytesSent: %d", bytesSent);
 
 	// Open file for reading
 	FILE *file = fopen(filename, "rb");
 	if (!file) {
 		LOGE("Error opening file");
-		return;
+		return -1;
 	}
+
 	// Send file content
 	LOGI("Sending file content");
-	unsigned char buffer[BUFFER_SIZE] = {0};
+	unsigned char buffer[CHUNK_SIZE] = {0};
 	size_t bytesRead = 0;
 
 	while (true) {
-		// LOGI("while");
-		memset(buffer, 0, BUFFER_SIZE);
-		bytesRead = fread(buffer, 1, BUFFER_SIZE, file);
-		if (bytesRead <= 0)
+		memset(buffer, 0, CHUNK_SIZE);
+		bytesRead = fread(buffer, 1, CHUNK_SIZE, file);
+		if (bytesRead <= 0) {
+			sentFilesCounter += 1;
 			break;
-		ssize_t bytesSent = send(clientSocket, buffer, bytesRead, 0);
-		if (bytesSent == -1) {
-			LOGE("Error sending data");
+		}
+
+		if (send(clientSocket, buffer, bytesRead, 0) < 0) {
+			LOGE("Send data failed: %s", strerror(errno));
 			break;
 		}
 	}
@@ -225,12 +244,11 @@ void FileTransferServer::sendFile(int clientSocket, const char* filename) {
 	// Close the file
 	fclose(file);
 
-	sentFilesCounter += 1;
-	LOGI("File sent: %d/%d %s", sentFilesCounter, noOfFilesToSend,
-	      filename);
+	LOGI("File sent: %d/%d %s", sentFilesCounter, noOfFilesToSend, filename);
+	return 0;
 }
 
-bool FileTransferServer::isMultipleFiles(const char *filename) {
+bool FileTransferServer::isFilePattern(const char *filename) {
 	return strchr(filename, '*') != nullptr;
 }
 
@@ -283,6 +301,16 @@ std::vector<std::string> FileTransferServer::getMatchingFiles(const std::string
 	}
 
 	return matching_files;
+}
+
+bool FileTransferServer::fileExists(const char *path) {
+	FILE *file = fopen(path, "rb");
+	if (file) {
+		fclose(file);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 } // namespace Dex

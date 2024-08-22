@@ -7,7 +7,7 @@ class FileTransferClient {
 public:
 	void runClient(const char* serverIp, const char* filename);
 private:
-	void receiveFile(int serverSocket);
+	int receiveFile(int serverSocket);
 	unsigned noOfFilesToRecv = 0;
 	unsigned recvdFilesCounter = 0;
 };
