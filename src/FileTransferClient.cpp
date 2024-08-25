@@ -134,6 +134,7 @@ int FileTransferClient::receiveFile(int serverSocket) {
 		return -1;
 	}
 
+	recvdFilesCounter += 1;
 	LOGI("Receiving %d/%d name=%s size=%lld...", recvdFilesCounter, noOfFilesToRecv,
 	      fileName, fileSize);
 
@@ -147,6 +148,7 @@ int FileTransferClient::receiveFile(int serverSocket) {
 		bytesRecv = recv(serverSocket, buffer, CHUNK_SIZE, 0);
 		if (bytesRecv < 0) {
 			LOGE("Receive file chunk failed: %s", strerror(errno));
+			recvdFilesCounter -= 1;
 			break;
 		}
 
@@ -169,10 +171,10 @@ int FileTransferClient::receiveFile(int serverSocket) {
 	new_times.modtime = file_time; // Set the modification time
 	if (utime(fileName, &new_times) == -1) {
 		LOGE("Error copying file timestamp: %s", strerror(errno));
+		recvdFilesCounter -= 1;
 		return -1;
 	}
 
-	recvdFilesCounter += 1;
 	LOGI("File receive completed %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
 	      fileName);
 
