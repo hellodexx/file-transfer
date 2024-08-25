@@ -80,9 +80,8 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename, c
 		for (size_t i = 0; i < noOfFilesToRecv; i++) {	
 			// Receive the file and save to local
 			receiveFile(serverSocket);
-			LOGI("Total received files: %d ", recvdFilesCounter);
-
 		}
+		LOGI("Total received files: %d ", recvdFilesCounter);
 	} else if (cmd == FileTransferClient::command::LIST) {
 		receiveFileList(serverSocket);
 		LOGI("Total list files: %d ", noOfFilesToRecv);
@@ -135,6 +134,9 @@ int FileTransferClient::receiveFile(int serverSocket) {
 		return -1;
 	}
 
+	LOGI("Receiving %d/%d name=%s size=%lld...", recvdFilesCounter, noOfFilesToRecv,
+	      fileName, fileSize);
+
 	// Receive the content of the file
 	LOGD("Receiving file content");
 	unsigned char buffer[CHUNK_SIZE] = {0};
@@ -171,7 +173,7 @@ int FileTransferClient::receiveFile(int serverSocket) {
 	}
 
 	recvdFilesCounter += 1;
-	LOGI("File received: %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
+	LOGI("File receive completed %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
 	      fileName);
 
 	return 0;
