@@ -23,7 +23,7 @@ class DexFileTransferService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
                 "ForegroundServiceChannel",
-                "Foreground Service",
+                "Dex File Transfer Service",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
             val manager = getSystemService(NotificationManager::class.java)
@@ -31,8 +31,8 @@ class DexFileTransferService : Service() {
         }
 
         val notification: Notification = NotificationCompat.Builder(this, "ForegroundServiceChannel")
-            .setContentTitle("Foreground Service")
-            .setContentText("Service is running...")
+            .setContentTitle("Dex File Transfer Service")
+            .setContentText("Dex File Transfer service is running...")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .build()
 
