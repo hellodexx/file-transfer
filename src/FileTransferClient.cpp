@@ -42,6 +42,7 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename, c
 		LOGE("Connection failed: %s", strerror(errno));
 		return;
 	}
+	LOGI("Connected to server");
 
 	// Send command to server
 	LOGI("Command: %d", static_cast<int>(cmd));
@@ -84,7 +85,7 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename, c
 		}
 	} else if (cmd == FileTransferClient::command::LIST) {
 		receiveFileList(serverSocket);
-		LOGI("Total received files: %d ", noOfFilesToRecv);
+		LOGI("Total list files: %d ", noOfFilesToRecv);
 	}
 
 	LOGI("Closing connection");

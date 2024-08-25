@@ -26,9 +26,11 @@ namespace Dex {
 #define CHUNK_SIZE 1024
 
 FileTransferServer::FileTransferServer() : serverSocket(-1) {
+	LOGD("Starting...");
 }
 
 FileTransferServer::~FileTransferServer() {
+	LOGD("Destroying socket...");
 	if (serverSocket != -1) {
 		close(serverSocket);
 	}
