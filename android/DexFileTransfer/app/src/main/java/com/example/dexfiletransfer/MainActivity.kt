@@ -35,7 +35,8 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_MEDIA_LOCATION,
             Manifest.permission.FOREGROUND_SERVICE,
-            Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE
+            Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE,
+            Manifest.permission.POST_NOTIFICATIONS
             ),
             0) // Add checking
 
