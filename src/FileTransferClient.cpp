@@ -16,9 +16,10 @@ namespace Dex {
 
 #define DEFAULT_PORT 9413
 #define FILENAME_SIZE 1024
-#define CHUNK_SIZE 1024
+#define CHUNK_SIZE 1024*16
 
-void FileTransferClient::runClient(const char* serverIp, const char* filename, command cmd) {
+void FileTransferClient::runClient(const char* serverIp, const char* filename,
+    command cmd) {
 	int serverSocket;
 	struct sockaddr_in serverAddr;
 	noOfFilesToRecv = 0;
@@ -81,10 +82,10 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename, c
 			// Receive the file and save to local
 			receiveFile(serverSocket);
 		}
-		LOGI("Total received files: %d ", recvdFilesCounter);
+		LOGI("Total downloaded files: %d ", recvdFilesCounter);
 	} else if (cmd == FileTransferClient::command::LIST) {
 		receiveFileList(serverSocket);
-		LOGI("Total list files: %d ", noOfFilesToRecv);
+		LOGI("Total found files: %d ", noOfFilesToRecv);
 	}
 
 	LOGI("Closing connection");
@@ -112,12 +113,12 @@ int FileTransferClient::receiveFile(int serverSocket) {
 
 	// Receive file size
 	LOGD("Receiving file size");
-	long long fileSize = 0;
+	size_t fileSize = 0;
 	if (recv(serverSocket, &fileSize, sizeof(fileSize), 0) < 0) {
 		LOGE("Receive file size failed: %s", strerror(errno));
 		return -1;
 	}
-	LOGD("File size: %lld", fileSize);
+	LOGD("File size: %ld", fileSize);
 
 	// Receive file timestamp
 	LOGD("Receiving file time stamp");
@@ -135,17 +136,17 @@ int FileTransferClient::receiveFile(int serverSocket) {
 	}
 
 	recvdFilesCounter += 1;
-	LOGI("Receiving %d/%d name=%s size=%lld...", recvdFilesCounter, noOfFilesToRecv,
-	      fileName, fileSize);
+	LOGI("Downloading %d/%d name=%s size=%zu...", recvdFilesCounter,
+	    noOfFilesToRecv, fileName, fileSize);
 
 	// Receive the content of the file
 	LOGD("Receiving file content");
-	unsigned char buffer[CHUNK_SIZE] = {0};
+	char buffer[CHUNK_SIZE] = {0};
 	ssize_t bytesRecv = 0;
-	long long totalBytes = 0;
+	size_t totalBytesRecv = 0;
 	while (true) {
-		memset(buffer, 0, CHUNK_SIZE);
 		bytesRecv = recv(serverSocket, buffer, CHUNK_SIZE, 0);
+
 		if (bytesRecv < 0) {
 			LOGE("Receive file chunk failed: %s", strerror(errno));
 			recvdFilesCounter -= 1;
@@ -153,11 +154,12 @@ int FileTransferClient::receiveFile(int serverSocket) {
 		}
 
 		fwrite(buffer, 1, bytesRecv, file);
+		totalBytesRecv += bytesRecv;
 
-		totalBytes += bytesRecv;
-		if (totalBytes >= fileSize) {
+		if (totalBytesRecv >= fileSize) {
 			break;
 		}
+		memset(buffer, 0, CHUNK_SIZE);
 	}
 	
 	// Close the file
@@ -175,7 +177,7 @@ int FileTransferClient::receiveFile(int serverSocket) {
 		return -1;
 	}
 
-	LOGI("File receive completed %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
+	LOGI("Download file completed %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
 	      fileName);
 
 	return 0;

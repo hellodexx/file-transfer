@@ -23,7 +23,7 @@ namespace Dex {
 #define DEFAULT_PORT 9413
 #define MAX_CLIENTS 10
 #define FILENAME_SIZE 1024
-#define CHUNK_SIZE 1024
+#define CHUNK_SIZE 1024*16
 
 FileTransferServer::FileTransferServer() : serverSocket(-1) {
 	LOGD("Starting...");
@@ -97,7 +97,8 @@ void FileTransferServer::runServer() {
 		}
 		LOGI("New client connection");
 
-		std::thread clientThread(&FileTransferServer::handleClient, this, clientSocket);
+		std::thread clientThread(&FileTransferServer::handleClient, this,
+		    clientSocket);
 		clientThread.detach();
 	}
 
@@ -177,7 +178,7 @@ void FileTransferServer::handleClient(int clientSocket) {
 	close(clientSocket);
 }
 
-int FileTransferServer::sendFile(int clientSocket, const char *filename) {
+int FileTransferServer::sendFile(int clientSocket, const char *filename) {	
 	// Wait for client start signal
 	LOGD("Waiting for start signal");
 	short startSignal = 0;
@@ -195,24 +196,16 @@ int FileTransferServer::sendFile(int clientSocket, const char *filename) {
 		return -1;
 	}
 
-	// Open file descriptor
-	int fd = open(filename, O_RDONLY);
-	if (fd == -1) {
-		LOGE("Error opening file: %s", strerror(errno));
-		return -1;
-	}
-
-	// Retrieve file information
+	// Retrieve file status
 	struct stat file_stat;
-	if (fstat(fd, &file_stat) < 0) {
-		LOGE("Error getting file information: %s", strerror(errno));
-		close(fd);
+	if (stat(filename, &file_stat) != 0) {
+		LOGE("Error getting file status");
 		return -1;
 	}
-
+	
 	// Send file size
-	long long fileSize = file_stat.st_size;
-	LOGD("Sending file size: %lld", fileSize);
+	size_t fileSize = file_stat.st_size;
+	LOGD("Sending file size: %ld", fileSize);
 	if (send(clientSocket, &fileSize, sizeof(fileSize), 0) < 0) {
 		LOGE("Send file size failed: %s", strerror(errno));
 		return -1;
@@ -234,32 +227,48 @@ int FileTransferServer::sendFile(int clientSocket, const char *filename) {
 	}
 
 	// Send file content
-	LOGI("Sending file content");
-	unsigned char buffer[CHUNK_SIZE] = {0};
+	sentFilesCounter += 1;
+	LOGI("Sending %d/%d %s...", sentFilesCounter, noOfFilesToSend, filename);
+	char buffer[CHUNK_SIZE] = {0};
 	size_t bytesRead = 0;
-
-	while (true) {
-		memset(buffer, 0, CHUNK_SIZE);
-		bytesRead = fread(buffer, 1, CHUNK_SIZE, file);
-		if (bytesRead <= 0) {
-			sentFilesCounter += 1;
-			break;
+	ssize_t bytesSent = 0;
+	while ((bytesRead = fread(buffer, 1, CHUNK_SIZE, file)) > 0) {
+		if (bytesRead < CHUNK_SIZE) {
+			if (feof(file)) {
+				LOGD("End of file reached.\n");
+			} else if (ferror(file)) {
+				LOGE("Error reading file");
+				sentFilesCounter -= 1;
+			}
 		}
 
-		if (send(clientSocket, buffer, bytesRead, 0) < 0) {
-			LOGE("Send data failed: %s", strerror(errno));
+		size_t totalSent = 0;
+		while (totalSent < bytesRead) {
+			if ((bytesSent = send(clientSocket, buffer + totalSent, bytesRead -
+			    totalSent, 0)) < 0) {
+				LOGE("Send data failed: %s", strerror(errno));
+				break;
+			}
+			totalSent += bytesSent;
+		}
+
+		if (totalSent != bytesRead) {
+			LOGE("Error bytes sent not equal to bytes read!");
+			sentFilesCounter -= 1;
 			break;
 		}
+		memset(buffer, 0, sizeof(buffer));
 	}
 
 	// Close the file
 	fclose(file);
 
-	LOGI("File sent: %d/%d %s", sentFilesCounter, noOfFilesToSend, filename);
+	LOGI("Send file complete %d/%d %s", sentFilesCounter, noOfFilesToSend, filename);
 	return 0;
 }
 
-int FileTransferServer::sendFileList(int clientSocket, std::vector<std::string> files) {
+int FileTransferServer::sendFileList(int clientSocket, std::vector<std::string>
+    files) {
 	// Wait for client start signal
 	LOGD("Waiting for start signal");
 	short startSignal = 0;
