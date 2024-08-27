@@ -2,6 +2,7 @@ package com.example.dexfiletransfer
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
@@ -19,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        println("DexLog onCreate")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -32,12 +33,19 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.READ_MEDIA_IMAGES,
             Manifest.permission.READ_MEDIA_VIDEO,
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.ACCESS_MEDIA_LOCATION),
+            Manifest.permission.ACCESS_MEDIA_LOCATION,
+            Manifest.permission.FOREGROUND_SERVICE,
+            Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE,
+            Manifest.permission.POST_NOTIFICATIONS
+            ),
             0) // Add checking
 
-        GlobalScope.launch(Dispatchers.IO) {
-            runDexFileTransferServerJNI()
-        }
+//        GlobalScope.launch(Dispatchers.IO) {
+//            runDexFileTransferServerJNI()
+//        }
+
+        intent = Intent(this, DexFileTransferService::class.java)
+        startForegroundService(intent)
     }
 
     fun getLocalIpAddress(context: Context): String {
@@ -46,6 +54,11 @@ class MainActivity : AppCompatActivity() {
         return Formatter.formatIpAddress(ipAddress)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        stopService(intent)
+        println("DexLog onDestroy")
+    }
     /**
      * A native method that is implemented by the 'dexfiletransfer' native library,
      * which is packaged with this application.

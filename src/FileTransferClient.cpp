@@ -16,9 +16,10 @@ namespace Dex {
 
 #define DEFAULT_PORT 9413
 #define FILENAME_SIZE 1024
-#define CHUNK_SIZE 1024
+#define CHUNK_SIZE 1024*16
 
-void FileTransferClient::runClient(const char* serverIp, const char* filename, command cmd) {
+void FileTransferClient::runClient(const char* serverIp, const char* filename,
+    command cmd) {
 	int serverSocket;
 	struct sockaddr_in serverAddr;
 	noOfFilesToRecv = 0;
@@ -42,6 +43,7 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename, c
 		LOGE("Connection failed: %s", strerror(errno));
 		return;
 	}
+	LOGI("Connected to server");
 
 	// Send command to server
 	LOGI("Command: %d", static_cast<int>(cmd));
@@ -79,12 +81,11 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename, c
 		for (size_t i = 0; i < noOfFilesToRecv; i++) {	
 			// Receive the file and save to local
 			receiveFile(serverSocket);
-			LOGI("Total received files: %d ", recvdFilesCounter);
-
 		}
+		LOGI("Total downloaded files: %d ", recvdFilesCounter);
 	} else if (cmd == FileTransferClient::command::LIST) {
 		receiveFileList(serverSocket);
-		LOGI("Total received files: %d ", noOfFilesToRecv);
+		LOGI("Total found files: %d ", noOfFilesToRecv);
 	}
 
 	LOGI("Closing connection");
@@ -112,12 +113,12 @@ int FileTransferClient::receiveFile(int serverSocket) {
 
 	// Receive file size
 	LOGD("Receiving file size");
-	long long fileSize = 0;
+	size_t fileSize = 0;
 	if (recv(serverSocket, &fileSize, sizeof(fileSize), 0) < 0) {
 		LOGE("Receive file size failed: %s", strerror(errno));
 		return -1;
 	}
-	LOGD("File size: %lld", fileSize);
+	LOGD("File size: %ld", fileSize);
 
 	// Receive file timestamp
 	LOGD("Receiving file time stamp");
@@ -134,25 +135,31 @@ int FileTransferClient::receiveFile(int serverSocket) {
 		return -1;
 	}
 
+	recvdFilesCounter += 1;
+	LOGI("Downloading %d/%d name=%s size=%zu...", recvdFilesCounter,
+	    noOfFilesToRecv, fileName, fileSize);
+
 	// Receive the content of the file
 	LOGD("Receiving file content");
-	unsigned char buffer[CHUNK_SIZE] = {0};
+	char buffer[CHUNK_SIZE] = {0};
 	ssize_t bytesRecv = 0;
-	long long totalBytes = 0;
+	size_t totalBytesRecv = 0;
 	while (true) {
-		memset(buffer, 0, CHUNK_SIZE);
 		bytesRecv = recv(serverSocket, buffer, CHUNK_SIZE, 0);
+
 		if (bytesRecv < 0) {
 			LOGE("Receive file chunk failed: %s", strerror(errno));
+			recvdFilesCounter -= 1;
 			break;
 		}
 
 		fwrite(buffer, 1, bytesRecv, file);
+		totalBytesRecv += bytesRecv;
 
-		totalBytes += bytesRecv;
-		if (totalBytes >= fileSize) {
+		if (totalBytesRecv >= fileSize) {
 			break;
 		}
+		memset(buffer, 0, CHUNK_SIZE);
 	}
 	
 	// Close the file
@@ -166,11 +173,11 @@ int FileTransferClient::receiveFile(int serverSocket) {
 	new_times.modtime = file_time; // Set the modification time
 	if (utime(fileName, &new_times) == -1) {
 		LOGE("Error copying file timestamp: %s", strerror(errno));
+		recvdFilesCounter -= 1;
 		return -1;
 	}
 
-	recvdFilesCounter += 1;
-	LOGI("File received: %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
+	LOGI("Download file completed %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
 	      fileName);
 
 	return 0;
