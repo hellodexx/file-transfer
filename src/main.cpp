@@ -1,7 +1,8 @@
-#include <iostream>
-#include <cstring>
 #include "FileTransferServer.h"
 #include "FileTransferClient.h"
+#include "packet.h"
+#include <iostream>
+#include <cstring>
 // Arg parse
 #include <getopt.h>
 
@@ -112,15 +113,15 @@ int main(int argc, char* argv[]) {
 			printf("-p or -l conflict");
 			printUsage();
 		}
-	
+
 		if (pattern.size()) {
 			ftClient.runClient(serverIp.c_str(), pattern.c_str(),
-			                   Dex::FileTransferClient::command::PULL);
+			                   Command::PULL);
 		}
 
 		if (listPattern.size()) {
 			ftClient.runClient(serverIp.c_str(), listPattern.c_str(),
-			                   Dex::FileTransferClient::command::LIST);
+			                   Command::LIST);
 		}
 	} else {
 		printUsage();

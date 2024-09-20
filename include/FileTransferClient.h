@@ -1,6 +1,8 @@
 #ifndef FILETRANSFERCLIENT_H
 #define FILETRANSFERCLIENT_H
 
+#include "packet.h"
+
 namespace Dex {
 
 class FileTransferClient {
@@ -11,12 +13,12 @@ public:
 		INVALID
 	};
 
-	void runClient(const char* serverIp, const char* filename, command cmd);
+	void runClient(const char* serverIp, const char* filename, Command cmd);
 private:
 	int receiveFile(int serverSocket);
 	int receiveFileList(int serverSocket);
 	unsigned noOfFilesToRecv = 0;
-	unsigned recvdFilesCounter = 0;
+	unsigned recvFilesCount = 0;
 };
 
 } // namespace Dex

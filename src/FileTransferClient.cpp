@@ -19,11 +19,12 @@ namespace Dex {
 #define CHUNK_SIZE 1024*16
 
 void FileTransferClient::runClient(const char* serverIp, const char* filename,
-    command cmd) {
+    Command cmd) {
 	int serverSocket;
 	struct sockaddr_in serverAddr;
 	noOfFilesToRecv = 0;
 
+	// Create socket
 	if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		LOGE("Socket creation failed: %s", strerror(errno));
 		return;
@@ -37,6 +38,7 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename,
 		return;
 	}
 
+	// Connect to server
 	LOGI("Connecting to server");
 	if (connect(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))
 	    < 0) {
@@ -45,47 +47,46 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename,
 	}
 	LOGI("Connected to server");
 
-	// Send command to server
-	LOGI("Command: %d", static_cast<int>(cmd));
-	if (send(serverSocket, &cmd, sizeof(cmd), 0) < 0) {
+	// Send command + pattern to server
+	InitPacket initPkt{};
+	initPkt.command = cmd;
+	memset(initPkt.pattern, 0, sizeof(initPkt.pattern));
+	memcpy(initPkt.pattern, filename, strlen(filename));
+
+	LOGI("Sending command=%d filename=%s", static_cast<int>(cmd), filename);
+	if (send(serverSocket, &initPkt, sizeof(initPkt), 0) < 0) {
 		LOGE("Send command failed: %s", strerror(errno));
 		close(serverSocket);
 		return;
 	}
 
-	// Send file name to the server
-	LOGI("File name: %s", filename);
-	if (send(serverSocket, filename, FILENAME_SIZE, 0) < 0) {
-		LOGE("Send file name failed: %s", strerror(errno));
-		close(serverSocket);
-		return;
-	}
-
 	// Receive number of files
+	InitReplyPkt initReplyPkt{};
 	LOGD("Receiving number of files");
-	if (recv(serverSocket, &noOfFilesToRecv, sizeof(noOfFilesToRecv), 0) < 0) {
+	if (recv(serverSocket, &initReplyPkt, sizeof(initReplyPkt), 0) < 0) {
 		LOGE("Receive number of file failed: %s", strerror(errno));
 		close(serverSocket);
 		return;
 	}
+	noOfFilesToRecv = initReplyPkt.noOfFiles;
 
-	if (noOfFilesToRecv == 0) {
+	// Close and return if no files are found
+	if (initReplyPkt.noOfFiles == 0) {
 		LOGE("No files found with pattern: %s", filename);
 		close(serverSocket);
 		return;
 	}
+	LOGD("noOfFiles: %d", initReplyPkt.noOfFiles);
 
-	LOGD("noOfFilesToRecv: %d", noOfFilesToRecv);
-
-	if (cmd == FileTransferClient::command::PULL) {
-		for (size_t i = 0; i < noOfFilesToRecv; i++) {	
-			// Receive the file and save to local
+	if (cmd == Command::PULL) {
+		// Receive files and save to local
+		for (size_t i = 0; i < initReplyPkt.noOfFiles; i++) {
 			receiveFile(serverSocket);
 		}
-		LOGI("Total downloaded files: %d ", recvdFilesCounter);
-	} else if (cmd == FileTransferClient::command::LIST) {
+		LOGI("Total files downloaded: %d ", recvFilesCount);
+	} else if (cmd == Command::LIST) {
 		receiveFileList(serverSocket);
-		LOGI("Total found files: %d ", noOfFilesToRecv);
+		LOGI("Total files found: %d ", initReplyPkt.noOfFiles);
 	}
 
 	LOGI("Closing connection");
@@ -94,50 +95,35 @@ void FileTransferClient::runClient(const char* serverIp, const char* filename,
 }
 
 int FileTransferClient::receiveFile(int serverSocket) {
-	char fileName[100] = {0};
-
 	// Send start signal to server
 	LOGD("Sending start signal");
-	short startSignal = 0;
-	if (send(serverSocket, &startSignal, sizeof(startSignal), 0) < 0) {
+	StartSignalPkt startSignalPkt{};
+	startSignalPkt.start = true;
+	if (send(serverSocket, &startSignalPkt, sizeof(startSignalPkt), 0) < 0) {
 		LOGE("Send start signal failed: %s", strerror(errno));
 		return -1;
 	}
 
-	// Receive file name
-	LOGD("Receiving file name");
-	if (recv(serverSocket, fileName, 100, 0) < 0) {
-		LOGE("Receive file name failed: %s", strerror(errno));
+	// Receive file info packet
+	FileInfoPkt fileInfoPkt{};
+	LOGD("Receiving file info");
+	if (recv(serverSocket, &fileInfoPkt, sizeof(fileInfoPkt), 0) < 0) {
+		LOGE("Receive file info failed: %s", strerror(errno));
 		return -1;
 	}
-
-	// Receive file size
-	LOGD("Receiving file size");
-	size_t fileSize = 0;
-	if (recv(serverSocket, &fileSize, sizeof(fileSize), 0) < 0) {
-		LOGE("Receive file size failed: %s", strerror(errno));
-		return -1;
-	}
-	LOGD("File size: %ld", fileSize);
-
-	// Receive file timestamp
-	LOGD("Receiving file time stamp");
-	time_t file_time;
-	if (recv(serverSocket, &file_time, sizeof(time_t), 0) != sizeof(time_t)) {
-		LOGE("Receive file timestamp failed: %s", strerror(errno));
-		return -1;
-	}
+	LOGD("File name=%s size=%d time=%d", fileInfoPkt.name, fileInfoPkt.size,
+	      fileInfoPkt.time);
 
 	// Open file for writing
-	FILE *file = fopen(fileName, "wb");
+	FILE *file = fopen(fileInfoPkt.name, "wb");
 	if (!file) {
 		LOGE("Error opening file");
 		return -1;
 	}
 
-	recvdFilesCounter += 1;
-	LOGI("Downloading %d/%d name=%s size=%zu...", recvdFilesCounter,
-	    noOfFilesToRecv, fileName, fileSize);
+	recvFilesCount += 1;
+	LOGI("Downloading %d/%d name=%s size=%zu...", recvFilesCount,
+	    noOfFilesToRecv, fileInfoPkt.name, fileInfoPkt.size);
 
 	// Receive the content of the file
 	LOGD("Receiving file content");
@@ -149,14 +135,14 @@ int FileTransferClient::receiveFile(int serverSocket) {
 
 		if (bytesRecv < 0) {
 			LOGE("Receive file chunk failed: %s", strerror(errno));
-			recvdFilesCounter -= 1;
+			recvFilesCount -= 1;
 			break;
 		}
 
 		fwrite(buffer, 1, bytesRecv, file);
 		totalBytesRecv += bytesRecv;
 
-		if (totalBytesRecv >= fileSize) {
+		if (totalBytesRecv >= fileInfoPkt.size) {
 			break;
 		}
 		memset(buffer, 0, CHUNK_SIZE);
@@ -169,16 +155,16 @@ int FileTransferClient::receiveFile(int serverSocket) {
 	// Copy original file timestamp
 	LOGD("Copying original time stamp");
 	struct utimbuf new_times;
-	new_times.actime = file_time; // Use the current access time
-	new_times.modtime = file_time; // Set the modification time
-	if (utime(fileName, &new_times) == -1) {
+	new_times.actime = fileInfoPkt.time; // Use the current access time
+	new_times.modtime = fileInfoPkt.time; // Set the modification time
+	if (utime(fileInfoPkt.name, &new_times) == -1) {
 		LOGE("Error copying file timestamp: %s", strerror(errno));
-		recvdFilesCounter -= 1;
+		recvFilesCount -= 1;
 		return -1;
 	}
 
-	LOGI("Download file completed %d/%d %s", recvdFilesCounter, noOfFilesToRecv,
-	      fileName);
+	LOGI("Download file completed %d/%d %s", recvFilesCount, noOfFilesToRecv,
+	      fileInfoPkt.name);
 
 	return 0;
 }
@@ -188,8 +174,9 @@ int FileTransferClient::receiveFileList(int serverSocket) {
 
 	// Send start signal to server
 	LOGD("Sending start signal");
-	short startSignal = 0;
-	if (send(serverSocket, &startSignal, sizeof(startSignal), 0) < 0) {
+	StartSignalPkt startSignalPkt{};
+	startSignalPkt.start = true;
+	if (send(serverSocket, &startSignalPkt, sizeof(startSignalPkt), 0) < 0) {
 		LOGE("Send start signal failed: %s", strerror(errno));
 		return -1;
 	}
