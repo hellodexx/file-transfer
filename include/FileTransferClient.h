@@ -7,12 +7,6 @@ namespace Dex {
 
 class FileTransferClient {
 public:
-	enum class command {
-		PULL,
-		LIST,
-		INVALID
-	};
-
 	void runClient(const char* serverIp, const char* filename, Command cmd);
 private:
 	int receiveFile(int serverSocket);
