@@ -4,17 +4,20 @@
 
 enum class Command {
 	PULL,
+	PUSH,
 	LIST,
 	INVALID
 };
 
 typedef struct InitPkt {
 	Command command = Command::INVALID;
-	char pattern[512];
+	char pattern[512]; // file pattern
+	unsigned totalFiles; // Number of local files found used for PUSH command.
 } InitPacket ;
 
 typedef struct InitReplyPkt {
-	unsigned noOfFiles;
+	bool proceed;
+	unsigned totalFiles;
 } initReplyPkt;
 
 typedef struct StartSignalPkt {

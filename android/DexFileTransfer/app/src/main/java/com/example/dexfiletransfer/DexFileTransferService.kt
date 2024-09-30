@@ -39,6 +39,8 @@ class DexFileTransferService : Service() {
         startForeground(1, notification)
 
         Thread {
+            // TODO: Improve scan execution
+            MainActivity.scanDirectory(this, "/storage/self/primary/DCIM/DexFileTransfer")
             runDexFileTransferServerJNI()
         }.start()
 

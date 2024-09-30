@@ -19,6 +19,7 @@ void printUsage() {
 	std::cout << "  -c, --client\t Run client mode\n";
 	std::cout << "  -i, --ip\t IP address of the server\n";
 	std::cout << "  -p, --pull\t File pattern to pull\n";
+	std::cout << "  -u, --push\t File pattern to push\n";
 	std::cout << "  -l, --list\t File pattern to list\n";
 	exit(1);
 }
@@ -34,9 +35,9 @@ int main(int argc, char* argv[]) {
 	binName = argv[0];
 	int opt;
 	int option_index = 0;
+	Command cmd = Command::INVALID;
 	std::string serverIp;
 	std::string pattern;
-	std::string listPattern;
 	Dex::FileTransferServer ftServer;
 	Dex::FileTransferClient ftClient;
 
@@ -47,11 +48,12 @@ int main(int argc, char* argv[]) {
 		{"client", no_argument, 0, 'c'},
 		{"ip", required_argument, 0, 'i'},
 		{"pull", required_argument, 0, 'p'},
+		{"push", required_argument, 0, 'u'},
 		{"list", required_argument, 0, 'l'},
 		{0, 0, 0, 0} // This marks the end of the array
 	};
 
-	while ((opt = getopt_long(argc, argv, "hvsci:p:l:", long_options,
+	while ((opt = getopt_long(argc, argv, "hvsci:p:u:l:", long_options,
 	       &option_index)) != -1) {
 		switch (opt) {
 			case 'h':
@@ -76,10 +78,17 @@ int main(int argc, char* argv[]) {
 			case 'p':
 				std::cout << "Pull: " << optarg << "\n";
 				pattern = optarg;
+				cmd = Command::PULL;
+				break;
+			case 'u':
+				std::cout << "Push: " << optarg << "\n";
+				pattern = optarg;
+				cmd = Command::PUSH;
 				break;
 			case 'l':
 				std::cout << "List: " << optarg << "\n";
-				listPattern = optarg;
+				pattern = optarg;
+				cmd = Command::LIST;
 				break;
 			case '?':
 				// getopt_long already prints an error message
@@ -104,24 +113,27 @@ int main(int argc, char* argv[]) {
 			printUsage();
 		}
 
-		if (pattern.empty() && listPattern.empty()) {
-			printf("-p or -l is required");
+		if (pattern.empty()) {
+			printf("-p, -u, -l is required");
 			printUsage();
 		}
 
-		if (!pattern.empty() && !listPattern.empty()) {
-			printf("-p or -l conflict");
-			printUsage();
-		}
-
-		if (pattern.size()) {
-			ftClient.runClient(serverIp.c_str(), pattern.c_str(),
-			                   Command::PULL);
-		}
-
-		if (listPattern.size()) {
-			ftClient.runClient(serverIp.c_str(), listPattern.c_str(),
-			                   Command::LIST);
+		switch (cmd) {
+		case Command::PULL:
+			ftClient.runClient(serverIp.c_str(), Command::PULL,
+			                   pattern.c_str());
+			break;
+		case Command::PUSH:
+			ftClient.runClient(serverIp.c_str(), Command::PUSH,
+			                   pattern.c_str());
+			break;
+		case Command::LIST:
+			ftClient.runClient(serverIp.c_str(), Command::LIST,
+			                   pattern.c_str());
+			break;
+		default:
+			printf("Invalid command=%d\n", static_cast<int>(cmd));
+			break;
 		}
 	} else {
 		printUsage();
