@@ -6,3 +6,6 @@ src/.DS_Store
 *.o
 android/DexFileTransfer/app/src/main/cpp/include/
 android/DexFileTransfer/app/src/main/cpp/libs/
+*.mp4
+*.jpg
+ft

@@ -7,16 +7,10 @@ namespace Dex {
 
 class FileTransferServer {
 public:
-	enum class command {
-		PULL,
-		LIST,
-		INVALID
-	};
-
 	FileTransferServer();
 	~FileTransferServer();
-
 	void runServer();
+
 private:
 	void handleClient(int clientSocket);
 	int sendFile(int clientSocket, const char* filename);
@@ -29,8 +23,8 @@ private:
 	bool fileExists(const char *path);
 
 	int serverSocket;
-	unsigned noOfFilesToSend = 0;
-	unsigned sentFilesCounter = 0;
+	unsigned noOfFilesFound = 0;
+	unsigned sentFilesCount = 0;
 };
 
 } // namespace Dex
