@@ -3,6 +3,7 @@ package com.example.dexfiletransfer
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.media.MediaScannerConnection
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.TextView
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 
 import android.net.wifi.WifiManager
 import android.text.format.Formatter
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,7 +38,8 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.ACCESS_MEDIA_LOCATION,
             Manifest.permission.FOREGROUND_SERVICE,
             Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE,
-            Manifest.permission.POST_NOTIFICATIONS
+            Manifest.permission.POST_NOTIFICATIONS,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
             ),
             0) // Add checking
 
@@ -70,6 +73,31 @@ class MainActivity : AppCompatActivity() {
         // Used to load the 'dexfiletransfer' library on application startup.
         init {
             System.loadLibrary("dexfiletransfer")
+        }
+
+        // Function to scan all files in a directory
+        fun scanDirectory(context: Context, directoryPath: String) {
+            val directory = File(directoryPath)
+            if (directory.exists() && directory.isDirectory) {
+                val files = directory.listFiles()
+                files?.forEach { file ->
+                    if (file.isFile) {
+                        scanFile(context, file.absolutePath)
+                    }
+                }
+            } else {
+                println("DexLog Directory does not exist or is not a directory.")
+            }
+        }
+
+        // Helper function to scan a single file
+        private fun scanFile(context: Context, path: String) {
+            MediaScannerConnection.scanFile(
+                context, arrayOf(path), null
+            ) { _, uri ->
+                // Scanning completed
+                println("DexLog Scanned $path -> uri=$uri")
+            }
         }
     }
 }

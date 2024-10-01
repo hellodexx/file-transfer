@@ -14,7 +14,7 @@
 #define LOGI(fmt, ...) printf("INFO: " fmt "\n", ##__VA_ARGS__)
 #define LOGE(fmt, ...) fprintf(stderr, "ERROR: " fmt "\n", ##__VA_ARGS__)
 #endif
-#else // #ifdef DEBUG
+#else // RELEASE
 #ifdef __ANDROID__
 #include <android/log.h>
 #define LOG_TAG "DexLog"
