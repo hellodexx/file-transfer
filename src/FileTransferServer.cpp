@@ -24,7 +24,7 @@
 namespace Dex {
 
 #define DEFAULT_PORT 9413
-#define MAX_CLIENTS 10
+#define MAX_CLIENTS 1
 #define FILENAME_SIZE 1024
 #define CHUNK_SIZE 1024*16
 

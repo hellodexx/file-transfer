@@ -12,6 +12,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <utime.h>
+// Time
+#include <chrono>
 
 namespace Dex {
 
@@ -102,7 +104,7 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 
 	// Receive init reply
 	InitReplyPkt initReplyPkt{};
-	LOGD("Receiving init reply");
+	LOGI("Waiting server response");
 	if (recv(serverSocket, &initReplyPkt, sizeof(initReplyPkt), 0) < 0) {
 		LOGE("Receive init reply failed: %s", strerror(errno));
 		close(serverSocket);
@@ -124,6 +126,9 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 			return -1;
 		}
 	}
+
+	// Start time
+	auto startTime = std::chrono::high_resolution_clock::now();
 
 	switch (cmd) {
 	case Command::PULL:
@@ -153,6 +158,13 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 		return -1;
 		break;
 	}
+
+	// End time
+	auto endTime = std::chrono::high_resolution_clock::now();
+
+	// Calculate elapsed time
+	std::chrono::duration<double, std::milli> elapsed = endTime - startTime;
+	LOGI("Elapsed time: %lld milliseconds", static_cast<long long int>(elapsed.count()));
 
 	return 0;
 }

@@ -10,6 +10,7 @@ public:
 	FileTransferClient();
 	~FileTransferClient();
 	void runClient(const char* serverIp, Command cmd, const char* pattern);
+
 private:
 	int connectToServer(const char* serverIp);
 	int handleCommand(Command cmd, const char* pattern);

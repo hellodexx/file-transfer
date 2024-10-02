@@ -64,29 +64,23 @@ int main(int argc, char* argv[]) {
 				std::cout << "Version option\n";
 				break;
 			case 's':
-				std::cout << "Server mode\n";
 				mode = Mode::SERVER;
 				break;
 			case 'c':
-				std::cout << "Client mode\n";
 				mode = Mode::CLIENT;
 				break;
 			case 'i':
-				std::cout << "Server ip: " << optarg << "\n";
 				serverIp = optarg;
 				break;
 			case 'p':
-				std::cout << "Pull: " << optarg << "\n";
 				pattern = optarg;
 				cmd = Command::PULL;
 				break;
 			case 'u':
-				std::cout << "Push: " << optarg << "\n";
 				pattern = optarg;
 				cmd = Command::PUSH;
 				break;
 			case 'l':
-				std::cout << "List: " << optarg << "\n";
 				pattern = optarg;
 				cmd = Command::LIST;
 				break;
