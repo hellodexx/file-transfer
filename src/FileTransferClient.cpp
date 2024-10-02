@@ -133,6 +133,7 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 	switch (cmd) {
 	case Command::PULL:
 	{
+		LOGI("Start receiving files");
 		// Receive file(s) and save to local
 		for (size_t i = 0; i < totalFiles; i++) {
 			receiveFile();
@@ -142,6 +143,7 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 	}
 	case Command::PUSH:
 	{
+		LOGI("Start sending files");
 		for (const auto& file: files) {
 			LOGD("file: %s", file.c_str());
 			sendFile(file.c_str());
@@ -150,9 +152,12 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 		break;
 	}
 	case Command::LIST:
+	{
+		LOGI("Start receiving file list");
 		receiveFileList();
 		LOGI("Total files found: %d ", totalFiles);
 		break;
+	}
 	default:
 		LOGE("Invalid command=%d", static_cast<int>(cmd));
 		return -1;
@@ -164,7 +169,9 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 
 	// Calculate elapsed time
 	std::chrono::duration<double, std::milli> elapsed = endTime - startTime;
-	LOGI("Elapsed time: %lld milliseconds", static_cast<long long int>(elapsed.count()));
+	LOGI("Elapsed time: %lld milliseconds %.2f seconds",
+	     static_cast<long long int>(elapsed.count()),
+	     static_cast<double>(elapsed.count()/1000));
 
 	return 0;
 }
@@ -231,7 +238,7 @@ int FileTransferClient::receiveFile() {
 		}
 		memset(buffer, 0, CHUNK_SIZE);
 	}
-	
+
 	// Close the file
 	LOGD("Closing file");
 	fclose(file);
