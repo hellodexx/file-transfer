@@ -62,12 +62,11 @@ int FileTransferClient::connectToServer(const char* serverIp) {
 
 	// Connect to server
 	LOGI("Connecting to server");
-	if (connect(fd, (struct sockaddr*)&serverAddr, sizeof(serverAddr))
-	    < 0) {
+	if (connect(fd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
 		LOGE("Connection to server failed: %s", strerror(errno));
 		return -1;
 	}
-	LOGI("Connected to server");
+	LOGD("Connected to server");
 	return fd;
 }
 
@@ -111,9 +110,9 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 	}
 
 	if (cmd == Command::PULL || cmd == Command::LIST) {
-		// Close and return if no files are found
-		LOGD("initReplyPkt.totalFiles: %d", initReplyPkt.totalFiles);
+		// If no files are found then close
 		totalFiles = initReplyPkt.totalFiles;
+		LOGD("totalFiles: %d", totalFiles);
 		if (totalFiles == 0) {
 			LOGE("No files found in server with pattern=%s", pattern);
 			close(serverSocket);
@@ -127,19 +126,22 @@ int FileTransferClient::handleCommand(Command cmd, const char *pattern) {
 	}
 
 	switch (cmd) {
-	case Command::PULL: {
+	case Command::PULL:
+	{
 		// Receive file(s) and save to local
 		for (size_t i = 0; i < totalFiles; i++) {
 			receiveFile();
 		}
-		LOGI("Total files downloaded: %d ", fileCount);
+		LOGI("Total files received: %d ", fileCount);
 		break;
 	}
-	case Command::PUSH: {
+	case Command::PUSH:
+	{
 		for (const auto& file: files) {
 			LOGD("file: %s", file.c_str());
 			sendFile(file.c_str());
 		}
+		LOGI("Total files sent: %d ", fileCount);
 		break;
 	}
 	case Command::LIST:
@@ -160,16 +162,27 @@ int FileTransferClient::receiveFile() {
 	LOGD("Sending start signal");
 	StartSignalPkt startSignalPkt{};
 	startSignalPkt.start = true;
-	if (send(serverSocket, &startSignalPkt, sizeof(startSignalPkt), 0) < 0) {
-		LOGE("Send start signal failed: %s", strerror(errno));
+	ssize_t bytesSent = 0;
+	
+	if ((bytesSent = send(serverSocket, &startSignalPkt,
+	    sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
+		if (bytesSent < 0)
+			LOGE("Send start signal failed: %s", strerror(errno));
+		else
+			LOGE("Send start signal failed bytesSent=%zu", bytesSent);
 		return -1;
 	}
 
 	// Receive file info packet
+	ssize_t bytesRecv = 0;
 	FileInfoPkt fileInfoPkt{};
 	LOGD("Receiving file info");
-	if (recv(serverSocket, &fileInfoPkt, sizeof(fileInfoPkt), 0) < 0) {
-		LOGE("Receive file info failed: %s", strerror(errno));
+	if ((bytesRecv = recv(serverSocket, &fileInfoPkt, sizeof(fileInfoPkt), 0))
+	        != sizeof(fileInfoPkt)) {
+		if (bytesRecv < 0)
+			LOGE("Receive file info failed: %s", strerror(errno));
+		else
+			LOGE("Receive file info failed bytesRecv=%zu", bytesRecv);
 		return -1;
 	}
 	LOGD("File name=%s size=%ld time=%ld", fileInfoPkt.name, fileInfoPkt.size,
@@ -183,18 +196,16 @@ int FileTransferClient::receiveFile() {
 	}
 
 	fileCount += 1;
-	LOGI("Downloading %d/%d name=%s size=%zu...", fileCount,
-	    totalFiles, fileInfoPkt.name, fileInfoPkt.size);
+	LOGI("Receiving %d/%d name=%s size=%zu...", fileCount, totalFiles,
+	     fileInfoPkt.name, fileInfoPkt.size);
 
 	// Receive the content of the file
 	LOGD("Receiving file content");
 	char buffer[CHUNK_SIZE] = {0};
-	ssize_t bytesRecv = 0;
+	bytesRecv = 0;
 	size_t totalBytesRecv = 0;
 	while (true) {
-		bytesRecv = recv(serverSocket, buffer, CHUNK_SIZE, 0);
-
-		if (bytesRecv < 0) {
+		if ((bytesRecv = recv(serverSocket, buffer, CHUNK_SIZE, 0)) < 0) {
 			LOGE("Receive file chunk failed: %s", strerror(errno));
 			fileCount -= 1;
 			break;
@@ -224,23 +235,30 @@ int FileTransferClient::receiveFile() {
 		return -1;
 	}
 
-	LOGI("Download file completed %d/%d %s", fileCount, totalFiles,
-	      fileInfoPkt.name);
+	LOGI("Receive file completed %d/%d %s", fileCount, totalFiles,
+	     fileInfoPkt.name);
 
 	return 0;
 }
 
 int FileTransferClient::sendFile(const char* fileName) {
-	// Wait for server start signal
+	// Wait start signal from server
 	LOGD("Waiting for start signal");
 	StartSignalPkt startSignalPkt{};
-	if (recv(serverSocket, &startSignalPkt, sizeof(startSignalPkt), 0) < 0) {
-		LOGE("Receive start signal failed: %s", strerror(errno));
+	ssize_t bytesRecv = 0;
+	ssize_t bytesSent = 0;
+
+	if ((bytesRecv = recv(serverSocket, &startSignalPkt,
+	    sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
+		if (bytesRecv < 0)
+			LOGE("Receive start signal failed: %s", strerror(errno));
+		else
+			LOGE("Receive start signal failed bytesRecv=%zu", bytesRecv);
 		return -1;
 	}
 
 	if (!startSignalPkt.start) {
-		LOGE("Error: server start signal=%d", startSignalPkt.start);
+		LOGE("Error server did not proceed: signal=%d", startSignalPkt.start);
 		return -1;
 	}
 
@@ -258,12 +276,15 @@ int FileTransferClient::sendFile(const char* fileName) {
 	fileInfoPkt.size = file_stat.st_size;
 	fileInfoPkt.time = file_stat.st_mtime;
 
-	// Send file info packet
+	// Send file info packet to server
 	LOGD("Sending file name=%s size=%ld time=%ld...", fileInfoPkt.name,
 	     fileInfoPkt.size, fileInfoPkt.time);
-	if (send(serverSocket, &fileInfoPkt, sizeof(fileInfoPkt), 0) !=
-	    sizeof(fileInfoPkt)) {
-		LOGE("Send file info failed: %s", strerror(errno));
+	if ((bytesSent = send(serverSocket, &fileInfoPkt, sizeof(fileInfoPkt), 0)) 
+	    != sizeof(fileInfoPkt)) {
+		if (bytesSent < 0)
+			LOGE("Send file info failed: %s", strerror(errno));
+		else
+			LOGE("Send file info failed bytesSent=%zu", bytesSent);
 		return -1;
 	}
 
@@ -279,7 +300,7 @@ int FileTransferClient::sendFile(const char* fileName) {
 	LOGI("Sending file %d/%d %s...", fileCount, totalFiles, fileName);
 	char buffer[CHUNK_SIZE] = {0};
 	size_t bytesRead = 0;
-	ssize_t bytesSent = 0;
+	bytesSent = 0;
 	while ((bytesRead = fread(buffer, 1, CHUNK_SIZE, file)) > 0) {
 		if (bytesRead < CHUNK_SIZE) {
 			if (feof(file)) {
@@ -292,8 +313,8 @@ int FileTransferClient::sendFile(const char* fileName) {
 
 		size_t totalBytesSent = 0;
 		while (totalBytesSent < bytesRead) {
-			if ((bytesSent = send(serverSocket, buffer + totalBytesSent, bytesRead -
-			    totalBytesSent, 0)) < 0) {
+			if ((bytesSent = send(serverSocket, buffer + totalBytesSent,
+			    bytesRead - totalBytesSent, 0)) < 0) {
 				LOGE("Send data failed: %s", strerror(errno));
 				break;
 			}
@@ -322,16 +343,21 @@ int FileTransferClient::receiveFileList() {
 	LOGD("Sending start signal");
 	StartSignalPkt startSignalPkt{};
 	startSignalPkt.start = true;
-	if (send(serverSocket, &startSignalPkt, sizeof(startSignalPkt), 0) < 0) {
-		LOGE("Send start signal failed: %s", strerror(errno));
+	ssize_t bytesSent = 0;
+	if ((bytesSent = send(serverSocket, &startSignalPkt,
+	    sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
+		if (bytesSent < 0)
+			LOGE("Send start signal failed: %s", strerror(errno));
+		else
+			LOGE("Send start signal failed bytesSent=%zu", bytesSent);
 		return -1;
 	}
 
 	// Receive file list
 	LOGD("Receiving file list");
+	ssize_t bytesRecv;
 	while (true) {
 		memset(buffer, 0, sizeof(buffer));
-		size_t bytesRecv;
 		if ((bytesRecv = recv(serverSocket, buffer, CHUNK_SIZE, 0)) < 0) {
 			break;
 		}

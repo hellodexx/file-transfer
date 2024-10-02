@@ -74,8 +74,10 @@ int createDirectory(const char *dir) {
 	if (mkdir(dir, 0777) == 0) {
 		LOGD("Directory created successfully.");
 	} else {
-		LOGE("Failed to create directory. [%s]", dir);
-		return -1;
+		if (errno != EEXIST) {
+			LOGE("Failed to create directory. %s", strerror(errno));
+			return -1;
+		}
 	}
 
 	return 0;
