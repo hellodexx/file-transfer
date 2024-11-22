@@ -278,6 +278,8 @@ int FileTransferServer::sendFile(int clientSocket, const char *filename) {
 	memcpy(fileInfoPkt.name, baseName.c_str(), baseName.length());
 	fileInfoPkt.size = file_stat.st_size;
 	fileInfoPkt.time = file_stat.st_mtime;
+	LOGD("xxxxxx file_stat.st_size=%lld", file_stat.st_size);
+	LOGD("xxxxxx file_stat.st_mtime=%ld", file_stat.st_mtime);
 
 	// Send file info packet to client
 	LOGD("Sending file name=%s size=%ld time=%ld", fileInfoPkt.name,
