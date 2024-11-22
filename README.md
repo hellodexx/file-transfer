@@ -49,7 +49,7 @@ Examples:
 ./ft -c -i 127.0.0.1 -p "~/path/to/file/*.mp4"
 ./ft -c -i 127.0.0.1 -p "~/path/to/file/filename_prefix*"
 ```
-### Download Android files from Linux(s)
+### Download Android files from Linux
 1. Build **android/DexFileTransfer** App and run it on your device.
 2. Run client on PC
 
@@ -57,7 +57,7 @@ Examples:
 ./ft -c -ip <server_ip> -p "filename_or_pattern"
 # Ex. ./ft -c 192.168.100.101 "2024*"
 ```
-### Download iPhone files from Linux(s)
+### Download iPhone files from Linux
 1. Build **ios/DexFileTransfer** App and run it on your device.
 2. Run client on PC
 
