@@ -95,7 +95,7 @@ void FileTransferServer::foo() {
     
     // Loop to all match assets
     for (const auto& [fileName, asset] : result) {
-        NSLog(@"--------Found file: %s, Asset: %@", fileName.c_str(), asset);
+        NSLog(@"Found file: %s, Asset: %@", fileName.c_str(), asset);
 
         // Fetch resources for the asset
         NSArray<PHAssetResource *> *resources = [PHAssetResource assetResourcesForAsset:asset];
