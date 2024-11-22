@@ -50,6 +50,6 @@ Examples:
 2. Run client on PC
 
 ```bash
-./ft --client --ip <server_ip> --pull <file_pattern>
+./ft --client --ip <server_ip> --pull </storage/self/primary/DCIM/Camera/2024*.jpg>
 ```
 ### Download iOS file(s) SOON

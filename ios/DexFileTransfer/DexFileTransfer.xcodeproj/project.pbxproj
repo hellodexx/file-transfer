@@ -1,0 +1,585 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C0EE211B2CF016FD0082D9AF /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0EE211A2CF016FD0082D9AF /* Photos.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C0EE20F12CF016A20082D9AF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C0EE20CD2CF016A10082D9AF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C0EE20D42CF016A10082D9AF;
+			remoteInfo = DexFileTransfer;
+		};
+		C0EE20FB2CF016A20082D9AF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C0EE20CD2CF016A10082D9AF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C0EE20D42CF016A10082D9AF;
+			remoteInfo = DexFileTransfer;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		C0EE20D52CF016A10082D9AF /* DexFileTransfer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DexFileTransfer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0EE20F02CF016A20082D9AF /* DexFileTransferTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DexFileTransferTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0EE20FA2CF016A20082D9AF /* DexFileTransferUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DexFileTransferUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0EE211A2CF016FD0082D9AF /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C0EE21022CF016A20082D9AF /* Exceptions for "DexFileTransfer" folder in "DexFileTransfer" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C0EE20D42CF016A10082D9AF /* DexFileTransfer */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		C0EE20D72CF016A10082D9AF /* DexFileTransfer */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C0EE21022CF016A20082D9AF /* Exceptions for "DexFileTransfer" folder in "DexFileTransfer" target */,
+			);
+			path = DexFileTransfer;
+			sourceTree = "<group>";
+		};
+		C0EE20F32CF016A20082D9AF /* DexFileTransferTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DexFileTransferTests;
+			sourceTree = "<group>";
+		};
+		C0EE20FD2CF016A20082D9AF /* DexFileTransferUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = DexFileTransferUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C0EE20D22CF016A10082D9AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0EE211B2CF016FD0082D9AF /* Photos.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0EE20ED2CF016A20082D9AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0EE20F72CF016A20082D9AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C0EE20CC2CF016A10082D9AF = {
+			isa = PBXGroup;
+			children = (
+				C0EE20D72CF016A10082D9AF /* DexFileTransfer */,
+				C0EE20F32CF016A20082D9AF /* DexFileTransferTests */,
+				C0EE20FD2CF016A20082D9AF /* DexFileTransferUITests */,
+				C0EE21192CF016FD0082D9AF /* Frameworks */,
+				C0EE20D62CF016A10082D9AF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C0EE20D62CF016A10082D9AF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C0EE20D52CF016A10082D9AF /* DexFileTransfer.app */,
+				C0EE20F02CF016A20082D9AF /* DexFileTransferTests.xctest */,
+				C0EE20FA2CF016A20082D9AF /* DexFileTransferUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C0EE21192CF016FD0082D9AF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C0EE211A2CF016FD0082D9AF /* Photos.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C0EE20D42CF016A10082D9AF /* DexFileTransfer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0EE21032CF016A20082D9AF /* Build configuration list for PBXNativeTarget "DexFileTransfer" */;
+			buildPhases = (
+				C0EE20D12CF016A10082D9AF /* Sources */,
+				C0EE20D22CF016A10082D9AF /* Frameworks */,
+				C0EE20D32CF016A10082D9AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C0EE20D72CF016A10082D9AF /* DexFileTransfer */,
+			);
+			name = DexFileTransfer;
+			packageProductDependencies = (
+			);
+			productName = DexFileTransfer;
+			productReference = C0EE20D52CF016A10082D9AF /* DexFileTransfer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C0EE20EF2CF016A20082D9AF /* DexFileTransferTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0EE21082CF016A20082D9AF /* Build configuration list for PBXNativeTarget "DexFileTransferTests" */;
+			buildPhases = (
+				C0EE20EC2CF016A20082D9AF /* Sources */,
+				C0EE20ED2CF016A20082D9AF /* Frameworks */,
+				C0EE20EE2CF016A20082D9AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C0EE20F22CF016A20082D9AF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C0EE20F32CF016A20082D9AF /* DexFileTransferTests */,
+			);
+			name = DexFileTransferTests;
+			packageProductDependencies = (
+			);
+			productName = DexFileTransferTests;
+			productReference = C0EE20F02CF016A20082D9AF /* DexFileTransferTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C0EE20F92CF016A20082D9AF /* DexFileTransferUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0EE210B2CF016A20082D9AF /* Build configuration list for PBXNativeTarget "DexFileTransferUITests" */;
+			buildPhases = (
+				C0EE20F62CF016A20082D9AF /* Sources */,
+				C0EE20F72CF016A20082D9AF /* Frameworks */,
+				C0EE20F82CF016A20082D9AF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C0EE20FC2CF016A20082D9AF /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				C0EE20FD2CF016A20082D9AF /* DexFileTransferUITests */,
+			);
+			name = DexFileTransferUITests;
+			packageProductDependencies = (
+			);
+			productName = DexFileTransferUITests;
+			productReference = C0EE20FA2CF016A20082D9AF /* DexFileTransferUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C0EE20CD2CF016A10082D9AF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1610;
+				TargetAttributes = {
+					C0EE20D42CF016A10082D9AF = {
+						CreatedOnToolsVersion = 16.1;
+					};
+					C0EE20EF2CF016A20082D9AF = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = C0EE20D42CF016A10082D9AF;
+					};
+					C0EE20F92CF016A20082D9AF = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = C0EE20D42CF016A10082D9AF;
+					};
+				};
+			};
+			buildConfigurationList = C0EE20D02CF016A10082D9AF /* Build configuration list for PBXProject "DexFileTransfer" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C0EE20CC2CF016A10082D9AF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C0EE20D62CF016A10082D9AF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C0EE20D42CF016A10082D9AF /* DexFileTransfer */,
+				C0EE20EF2CF016A20082D9AF /* DexFileTransferTests */,
+				C0EE20F92CF016A20082D9AF /* DexFileTransferUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C0EE20D32CF016A10082D9AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0EE20EE2CF016A20082D9AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0EE20F82CF016A20082D9AF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C0EE20D12CF016A10082D9AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0EE20EC2CF016A20082D9AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C0EE20F62CF016A20082D9AF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C0EE20F22CF016A20082D9AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C0EE20D42CF016A10082D9AF /* DexFileTransfer */;
+			targetProxy = C0EE20F12CF016A20082D9AF /* PBXContainerItemProxy */;
+		};
+		C0EE20FC2CF016A20082D9AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C0EE20D42CF016A10082D9AF /* DexFileTransfer */;
+			targetProxy = C0EE20FB2CF016A20082D9AF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		C0EE21042CF016A20082D9AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CCV2T73R8X;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DexFileTransfer/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dex File Transfer";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DexFileTransfer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C0EE21052CF016A20082D9AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CCV2T73R8X;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DexFileTransfer/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dex File Transfer";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DexFileTransfer;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C0EE21062CF016A20082D9AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		C0EE21072CF016A20082D9AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C0EE21092CF016A20082D9AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CCV2T73R8X;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DexFileTransferTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DexFileTransfer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DexFileTransfer";
+			};
+			name = Debug;
+		};
+		C0EE210A2CF016A20082D9AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CCV2T73R8X;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DexFileTransferTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DexFileTransfer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DexFileTransfer";
+			};
+			name = Release;
+		};
+		C0EE210C2CF016A20082D9AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CCV2T73R8X;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DexFileTransferUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = DexFileTransfer;
+			};
+			name = Debug;
+		};
+		C0EE210D2CF016A20082D9AF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CCV2T73R8X;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.DexFileTransferUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = DexFileTransfer;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C0EE20D02CF016A10082D9AF /* Build configuration list for PBXProject "DexFileTransfer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0EE21062CF016A20082D9AF /* Debug */,
+				C0EE21072CF016A20082D9AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0EE21032CF016A20082D9AF /* Build configuration list for PBXNativeTarget "DexFileTransfer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0EE21042CF016A20082D9AF /* Debug */,
+				C0EE21052CF016A20082D9AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0EE21082CF016A20082D9AF /* Build configuration list for PBXNativeTarget "DexFileTransferTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0EE21092CF016A20082D9AF /* Debug */,
+				C0EE210A2CF016A20082D9AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0EE210B2CF016A20082D9AF /* Build configuration list for PBXNativeTarget "DexFileTransferUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0EE210C2CF016A20082D9AF /* Debug */,
+				C0EE210D2CF016A20082D9AF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C0EE20CD2CF016A10082D9AF /* Project object */;
+}

@@ -20,3 +20,12 @@ Java_com_example_dexfiletransfer_MainActivity_runDexFileTransferServerJNI(
     std::string hello = "Hello from C++";
     return env->NewStringUTF(hello.c_str());
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_dexfiletransfer_DexFileTransferService_runDexFileTransferServerJNI(JNIEnv *env,
+                                                                                    jobject thiz) {
+    // TODO: implement runDexFileTransferServerJNI()
+    Dex::FileTransferServer ftServer;
+    ftServer.runServer();
+}

@@ -1,7 +1,8 @@
-#include <iostream>
-#include <cstring>
 #include "FileTransferServer.h"
 #include "FileTransferClient.h"
+#include "packet.h"
+#include <iostream>
+#include <cstring>
 // Arg parse
 #include <getopt.h>
 
@@ -18,6 +19,7 @@ void printUsage() {
 	std::cout << "  -c, --client\t Run client mode\n";
 	std::cout << "  -i, --ip\t IP address of the server\n";
 	std::cout << "  -p, --pull\t File pattern to pull\n";
+	std::cout << "  -u, --push\t File pattern to push\n";
 	std::cout << "  -l, --list\t File pattern to list\n";
 	exit(1);
 }
@@ -33,6 +35,7 @@ int main(int argc, char* argv[]) {
 	binName = argv[0];
 	int opt;
 	int option_index = 0;
+	Command cmd = Command::INVALID;
 	std::string serverIp;
 	std::string pattern;
 	Dex::FileTransferServer ftServer;
@@ -45,11 +48,13 @@ int main(int argc, char* argv[]) {
 		{"client", no_argument, 0, 'c'},
 		{"ip", required_argument, 0, 'i'},
 		{"pull", required_argument, 0, 'p'},
+		{"push", required_argument, 0, 'u'},
 		{"list", required_argument, 0, 'l'},
 		{0, 0, 0, 0} // This marks the end of the array
 	};
 
-	while ((opt = getopt_long(argc, argv, "hvsci:p:l:", long_options, &option_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "hvsci:p:u:l:", long_options,
+	       &option_index)) != -1) {
 		switch (opt) {
 			case 'h':
 				std::cout << "Help option\n";
@@ -59,23 +64,25 @@ int main(int argc, char* argv[]) {
 				std::cout << "Version option\n";
 				break;
 			case 's':
-				std::cout << "Server mode\n";
 				mode = Mode::SERVER;
 				break;
 			case 'c':
-				std::cout << "Client mode\n";
 				mode = Mode::CLIENT;
 				break;
 			case 'i':
-				std::cout << "Server ip: " << optarg << "\n";
 				serverIp = optarg;
 				break;
 			case 'p':
-				std::cout << "Pull: " << optarg << "\n";
 				pattern = optarg;
+				cmd = Command::PULL;
+				break;
+			case 'u':
+				pattern = optarg;
+				cmd = Command::PUSH;
 				break;
 			case 'l':
-				std::cout << "List: " << optarg << "\n";
+				pattern = optarg;
+				cmd = Command::LIST;
 				break;
 			case '?':
 				// getopt_long already prints an error message
@@ -99,11 +106,29 @@ int main(int argc, char* argv[]) {
 			printf("-i is required!\n");
 			printUsage();
 		}
+
 		if (pattern.empty()) {
-			printf("-p is required!\n");
+			printf("-p, -u, -l is required");
 			printUsage();
 		}
-		ftClient.runClient(serverIp.c_str(), pattern.c_str());
+
+		switch (cmd) {
+		case Command::PULL:
+			ftClient.runClient(serverIp.c_str(), Command::PULL,
+			                   pattern.c_str());
+			break;
+		case Command::PUSH:
+			ftClient.runClient(serverIp.c_str(), Command::PUSH,
+			                   pattern.c_str());
+			break;
+		case Command::LIST:
+			ftClient.runClient(serverIp.c_str(), Command::LIST,
+			                   pattern.c_str());
+			break;
+		default:
+			printf("Invalid command=%d\n", static_cast<int>(cmd));
+			break;
+		}
 	} else {
 		printUsage();
 	}
