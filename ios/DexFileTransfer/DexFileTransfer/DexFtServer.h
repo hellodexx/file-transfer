@@ -20,6 +20,7 @@ public:
     ~FileTransferServer();
     void runServer();
     void foo();
+    void stopServer();
 
 private:
     void handleClient(int clientSocket);
@@ -32,6 +33,7 @@ private:
     unsigned totalFiles = 0;
     unsigned fileCount = 0;
     std::map<std::string, PHAsset *> matchAssetsMap;
+    std::atomic<bool> running;
 };
 
 } // namespace Dex2

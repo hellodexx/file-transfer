@@ -13,12 +13,13 @@
 #import <arpa/inet.h>
 
 @interface ViewController ()
-@property (weak, nonatomic) IBOutlet UIButton *startButton;
 @property (weak, nonatomic) IBOutlet UILabel *ipLabel;
-@property (nonatomic, assign) bool lastButtonStatus;
+@property (weak, nonatomic) IBOutlet UISwitch *startSwitch;
 @end
 
 @implementation ViewController
+
+Dex::FileTransferServer ft;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -42,37 +43,32 @@
             }
         }];
 
-    _lastButtonStatus = true;
-
     // Retrieve and display the private IP address
     NSString *privateIPAddress = [self getPrivateIPAddress];
     NSLog(@"Private IP Address: %@", privateIPAddress);
     _ipLabel.text = privateIPAddress;
 
 }
-- (IBAction)startButtonPressed:(id)sender {
-    printf("startButtonPressed\n");
-    
-    if (_lastButtonStatus == false) {
-        printf("Server already running\n");
-        return;
-    }
-    
-    _startButton.enabled = false;
-    _lastButtonStatus = false;
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        Dex::FileTransferServer ft;
-//        ft.foo();
-        ft.runServer();
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSLog(@"UI can be updated after blocking function completes");
-            self->_startButton.enabled = true;
-            self->_lastButtonStatus = true;
+- (IBAction)startSwitchChanged:(id)sender {
+    NSLog(@"startSwitchChanged %d", _startSwitch.isOn);
+    
+    if (_startSwitch.isOn) {
+        NSLog(@"Turning on");
+
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//            Dex::FileTransferServer ft;
+            //        ft.foo();
+            ft.runServer();
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"UI can be updated after blocking function completes");
+            });
         });
-    });
-
+    } else {
+        NSLog(@"Turning off");
+        ft.stopServer();
+    }
 }
 
 - (NSString *)getPrivateIPAddress {

@@ -172,7 +172,8 @@ void FileTransferServer::foo() {
 #define FILENAME_SIZE 1024
 #define CHUNK_SIZE 1024*16
 
-FileTransferServer::FileTransferServer() : serverSocket(-1), totalFiles(0) {
+FileTransferServer::FileTransferServer() : serverSocket(-1),
+    totalFiles(0), running(true) {
     LOGD("Starting server...");
 }
 
@@ -230,15 +231,21 @@ void FileTransferServer::runServer() {
     }
     LOGD("Server is listening on port %d", DEFAULT_PORT);
 
-    while (true) {
+    running = true;
+    while (running) {
         // Accept a new connection
         int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr,
                            &addrLen);
+        if (!running) {
+            break; // Exit if the server is stopped during accept
+        }
+
         if (clientSocket < 0) {
             LOGE("Server accept failed: %s", strerror(errno));
             close(serverSocket);
             return;
         }
+        
         LOGI("New client connection");
 
         // Handle connection in a separate thread
@@ -398,7 +405,7 @@ void FileTransferServer::handleClient(int clientSocket) {
         return;
         break;
     }
-
+    
     LOGI("Closing client connection");
     close(clientSocket);
 }
@@ -758,6 +765,14 @@ int FileTransferServer::sendFileList(int clientSocket, std::vector<std::string>
 
     LOGI("File list sent completed");
     return 0;
+}
+
+void FileTransferServer::stopServer() {
+    LOGI("Stopping Server");
+    running = false;
+    // Trigger the server to exit from the accept call.
+    shutdown(serverSocket, SHUT_RDWR);
+    close(serverSocket);
 }
 
 } // namespace Dex
