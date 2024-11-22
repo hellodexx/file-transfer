@@ -9,3 +9,4 @@ android/DexFileTransfer/app/src/main/cpp/libs/
 *.mp4
 *.jpg
 ft
+*.xcuserstate
