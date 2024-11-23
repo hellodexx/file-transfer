@@ -42,12 +42,12 @@ make android_libs
 ## Usage
 
 ### Linux to Linux File Transfer
-1. Start the Server
+1. Start the Server  
 Run the server on the host device:
 ```bash
 ./ft -s
 ```
-2. Run the Client
+2. Run the Client  
 Run the client on the device you want to download files to:
 ```bash
 ./ft -c -i <server_ip> -p "<file_pattern>"
