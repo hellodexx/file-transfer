@@ -70,12 +70,12 @@ Download multiple files by pattern
 
 ```bash
 ./ft -c -i <server_ip> -p "<filename_or_pattern>"
-# Example: ./ft -c 192.168.100.101 "2024*"
+# Example: ./ft -c -i 192.168.100.101 "2024*"
 ```
 ### iPhone File Transfer
 1.	Build and run the **ios/DexFileTransfer** app on your iOS device.
 2.	Run the client from your PC:
 ```bash
 ./ft -c -i <server_ip> -p "<filename_or_pattern>"
-# Example: ./ft -c 192.168.100.101 "2024*"
+# Example: ./ft -c -i 192.168.100.101 "2024*"
 ```
