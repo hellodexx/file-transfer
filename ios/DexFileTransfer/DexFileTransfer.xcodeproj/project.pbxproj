@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C0AEB1992CF591FA00A9B8B1 /* PhotosUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0AEB1982CF591FA00A9B8B1 /* PhotosUI.framework */; };
+		C0AEB19B2CF5929600A9B8B1 /* UniformTypeIdentifiers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0AEB19A2CF5929600A9B8B1 /* UniformTypeIdentifiers.framework */; };
+		C0AEB19D2CF5991400A9B8B1 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0AEB19C2CF5991400A9B8B1 /* AVFoundation.framework */; };
 		C0EE211B2CF016FD0082D9AF /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0EE211A2CF016FD0082D9AF /* Photos.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +31,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C0AEB1982CF591FA00A9B8B1 /* PhotosUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotosUI.framework; path = System/Library/Frameworks/PhotosUI.framework; sourceTree = SDKROOT; };
+		C0AEB19A2CF5929600A9B8B1 /* UniformTypeIdentifiers.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UniformTypeIdentifiers.framework; path = System/Library/Frameworks/UniformTypeIdentifiers.framework; sourceTree = SDKROOT; };
+		C0AEB19C2CF5991400A9B8B1 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		C0EE20D52CF016A10082D9AF /* DexFileTransfer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DexFileTransfer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0EE20F02CF016A20082D9AF /* DexFileTransferTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DexFileTransferTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0EE20FA2CF016A20082D9AF /* DexFileTransferUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DexFileTransferUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,6 +76,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0AEB19D2CF5991400A9B8B1 /* AVFoundation.framework in Frameworks */,
+				C0AEB19B2CF5929600A9B8B1 /* UniformTypeIdentifiers.framework in Frameworks */,
+				C0AEB1992CF591FA00A9B8B1 /* PhotosUI.framework in Frameworks */,
 				C0EE211B2CF016FD0082D9AF /* Photos.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -115,6 +124,9 @@
 		C0EE21192CF016FD0082D9AF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C0AEB19C2CF5991400A9B8B1 /* AVFoundation.framework */,
+				C0AEB19A2CF5929600A9B8B1 /* UniformTypeIdentifiers.framework */,
+				C0AEB1982CF591FA00A9B8B1 /* PhotosUI.framework */,
 				C0EE211A2CF016FD0082D9AF /* Photos.framework */,
 			);
 			name = Frameworks;
