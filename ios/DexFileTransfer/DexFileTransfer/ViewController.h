@@ -6,8 +6,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <PhotosUI/PhotosUI.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <PHPickerViewControllerDelegate>
+
 
 @end
 

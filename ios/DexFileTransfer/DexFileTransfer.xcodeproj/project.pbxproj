@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C00D514C2CF6DD53006ECBB6 /* PhotosUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C00D514B2CF6DD53006ECBB6 /* PhotosUI.framework */; };
 		C0EE211B2CF016FD0082D9AF /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0EE211A2CF016FD0082D9AF /* Photos.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C00D514B2CF6DD53006ECBB6 /* PhotosUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotosUI.framework; path = System/Library/Frameworks/PhotosUI.framework; sourceTree = SDKROOT; };
 		C0EE20D52CF016A10082D9AF /* DexFileTransfer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DexFileTransfer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0EE20F02CF016A20082D9AF /* DexFileTransferTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DexFileTransferTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0EE20FA2CF016A20082D9AF /* DexFileTransferUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DexFileTransferUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C00D514C2CF6DD53006ECBB6 /* PhotosUI.framework in Frameworks */,
 				C0EE211B2CF016FD0082D9AF /* Photos.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -115,6 +118,7 @@
 		C0EE21192CF016FD0082D9AF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C00D514B2CF6DD53006ECBB6 /* PhotosUI.framework */,
 				C0EE211A2CF016FD0082D9AF /* Photos.framework */,
 			);
 			name = Frameworks;
