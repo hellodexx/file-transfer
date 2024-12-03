@@ -7,19 +7,24 @@
 
 #import "ViewController.h"
 #include "DexFtServer.h"
+#include "DexFtClient.h"
 #import <Photos/Photos.h>
 // Libraries to get local private address
 #import <ifaddrs.h>
 #import <arpa/inet.h>
 
 @interface ViewController ()
-@property (weak, nonatomic) IBOutlet UILabel *ipLabel;
+@property (weak, nonatomic) IBOutlet UILabel *localIp;
 @property (weak, nonatomic) IBOutlet UISwitch *startSwitch;
+@property (weak, nonatomic) IBOutlet UITextField *ftServerIp;
+@property (weak, nonatomic) IBOutlet UITextField *filePattern;
+@property (weak, nonatomic) IBOutlet UITextView *infoMessage;
+@property (weak, nonatomic) IBOutlet UIButton *sendButton;
 @end
 
 @implementation ViewController
 
-Dex::FileTransferServer ft;
+Dex::FileTransferServer ftServer;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -42,12 +47,17 @@ Dex::FileTransferServer ft;
                     break;
             }
         }];
-
-    // Retrieve and display the private IP address
-    NSString *privateIPAddress = [self getPrivateIPAddress];
-    NSLog(@"Private IP Address: %@", privateIPAddress);
-    _ipLabel.text = privateIPAddress;
-
+    
+    // Clear local ip label
+    _localIp.text = @"";
+    
+    _infoMessage.text = @"";
+    
+    // Add tap gesture recognizer to dismiss keyboard
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]
+                                    initWithTarget:self
+                                    action:@selector(dismissKeyboard)];
+    [self.view addGestureRecognizer:tap];
 }
 
 - (IBAction)startSwitchChanged:(id)sender {
@@ -55,11 +65,16 @@ Dex::FileTransferServer ft;
     
     if (_startSwitch.isOn) {
         NSLog(@"Turning on");
-
+        
+        self.infoMessage.text = @"Server listening...";
+        
+        // Retrieve and display the private IP address
+        NSString *privateIPAddress = [self getPrivateIPAddress];
+        NSLog(@"Private IP Address: %@", privateIPAddress);
+        _localIp.text = privateIPAddress;
+        
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-//            Dex::FileTransferServer ft;
-            //        ft.foo();
-            ft.runServer();
+            ftServer.runServer();
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSLog(@"UI can be updated after blocking function completes");
@@ -67,7 +82,9 @@ Dex::FileTransferServer ft;
         });
     } else {
         NSLog(@"Turning off");
-        ft.stopServer();
+        ftServer.stopServer();
+        _localIp.text = @"";
+        self.infoMessage.text = @"Server stopped";
     }
 }
 
@@ -103,4 +120,30 @@ Dex::FileTransferServer ft;
     return address;
 }
 
+- (IBAction)sendButtonPressed:(id)sender {
+    std::string cftServerIp = [self.ftServerIp.text UTF8String];
+    std::string cfilePattern = [self.filePattern.text UTF8String];
+    self.sendButton.enabled = false;
+    self.infoMessage.text = @"Sending...";
+    printf("sendButtonPressed [%s] [%s]\n", cftServerIp.c_str(), cfilePattern.c_str());
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        Dex::FileTransferClient ftClient;
+        int result = ftClient.runClient(cftServerIp.c_str(), Command::PUSH, cfilePattern.c_str());
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            printf("Send complete!\n");
+            self.sendButton.enabled = true;
+            if (result == 0) {
+                self.infoMessage.text = @"Send complete";
+            } else {
+                self.infoMessage.text = @"Send failed";
+            }
+        });
+    });
+}
+
+- (void)dismissKeyboard {
+    [self.view endEditing:YES];
+}
 @end
