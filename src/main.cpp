@@ -100,6 +100,8 @@ int main(int argc, char* argv[]) {
 	}
 
 	if (mode == Mode::SERVER) {
+		std::string localIp = ftServer.getLocalPrivateIP();
+		std::cout << "Server listening on " << localIp.c_str() << std::endl;
 		ftServer.runServer();
 	} else if (mode == Mode::CLIENT) {
 		if (serverIp.empty()) {

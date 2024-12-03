@@ -10,6 +10,7 @@ public:
 	FileTransferServer();
 	~FileTransferServer();
 	void runServer();
+	std::string getLocalPrivateIP();
 
 private:
 	void handleClient(int clientSocket);

@@ -21,6 +21,10 @@
 #include <sys/types.h>
 #include <fnmatch.h>
 
+#include <string>
+#include <ifaddrs.h>
+#include <netinet/in.h>
+
 namespace Dex {
 
 #define DEFAULT_PORT 9413
@@ -59,7 +63,7 @@ void FileTransferServer::runServer() {
 	}
 #else
 	if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
-	    sizeof(opt))) {
+		sizeof(opt))) {
 		LOGE("Set socket options failed: %s", strerror(errno));
 		close(serverSocket);
 		return;
@@ -72,7 +76,7 @@ void FileTransferServer::runServer() {
 
 	// Bind the socket to the network address and port
 	if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr))
-	    < 0) {
+		< 0) {
 		LOGE("Bind failed: %s", strerror(errno));
 		close(serverSocket);
 		return;
@@ -89,7 +93,7 @@ void FileTransferServer::runServer() {
 	while (true) {
 		// Accept a new connection
 		int clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr,
-		                   &addrLen);
+						   &addrLen);
 		if (clientSocket < 0) {
 			LOGE("Server accept failed: %s", strerror(errno));
 			close(serverSocket);
@@ -99,7 +103,7 @@ void FileTransferServer::runServer() {
 
 		// Handle connection in a separate thread
 		std::thread clientThread(&FileTransferServer::handleClient, this,
-		    clientSocket);
+			clientSocket);
 		clientThread.detach();
 	}
 
@@ -118,7 +122,7 @@ void FileTransferServer::handleClient(int clientSocket) {
 	// Receive command and pattern
 	InitPkt initPkt{};
 	if ((bytesRecv= recv(clientSocket, &initPkt, sizeof(initPkt), 0)) !=
-	    sizeof(initPkt)) {
+		sizeof(initPkt)) {
 		if (bytesRecv < 0)
 			LOGE("Receive command and pattern failed: %s", strerror(errno));
 		else
@@ -130,7 +134,7 @@ void FileTransferServer::handleClient(int clientSocket) {
 	totalFiles = initPkt.totalFiles;
 	std::string patternStr(initPkt.pattern);
 	LOGI("Received command=%d pattern=[%s] totalFiles=%d", static_cast<int>(cmd),
-	      patternStr.c_str(), totalFiles);
+		  patternStr.c_str(), totalFiles);
 
 	// If no path '/' symbol in pattern then set default path for android
 #ifdef __ANDROID__
@@ -162,7 +166,7 @@ void FileTransferServer::handleClient(int clientSocket) {
 		initReplyPkt.totalFiles = totalFiles;
 		LOGD("Sending number of file(s): %d", totalFiles);
 		if ((bytesSent = send(clientSocket, &initReplyPkt,
-		    sizeof(initReplyPkt), 0)) != sizeof(initReplyPkt)) {
+			sizeof(initReplyPkt), 0)) != sizeof(initReplyPkt)) {
 			if (bytesSent < 0)
 				LOGE("Sending number of files failed: %s", strerror(errno));
 			else
@@ -183,7 +187,7 @@ void FileTransferServer::handleClient(int clientSocket) {
 		initReplyPkt.proceed = true;
 		LOGD("Sending init reply...");
 		if ((bytesSent = send(clientSocket, &initReplyPkt,
-		    sizeof(initReplyPkt), 0)) != sizeof(initReplyPkt)) {
+			sizeof(initReplyPkt), 0)) != sizeof(initReplyPkt)) {
 			if (bytesSent < 0)
 				LOGE("Sending init reply failed: %s", strerror(errno));
 			else
@@ -256,7 +260,7 @@ int FileTransferServer::sendFile(int clientSocket, const char *filename) {
 	ssize_t bytesSent = 0;
 
 	if ((bytesRecv = recv(clientSocket, &startSignalPkt,
-	    sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
+		sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
 		if (bytesRecv < 0)
 			LOGE("Receive start signal failed: %s", strerror(errno));
 		else
@@ -283,9 +287,9 @@ int FileTransferServer::sendFile(int clientSocket, const char *filename) {
 
 	// Send file info packet to client
 	LOGD("Sending file name=%s size=%ld time=%ld", fileInfoPkt.name,
-	     fileInfoPkt.size, fileInfoPkt.time);
+		 fileInfoPkt.size, fileInfoPkt.time);
 	if ((bytesSent = send(clientSocket, &fileInfoPkt, sizeof(fileInfoPkt), 0))
-	    != sizeof(fileInfoPkt)) {
+		!= sizeof(fileInfoPkt)) {
 		if (bytesSent < 0)
 			LOGE("Send file info failed: %s", strerror(errno));
 		else
@@ -319,7 +323,7 @@ int FileTransferServer::sendFile(int clientSocket, const char *filename) {
 		totalBytesSent = 0;
 		while (totalBytesSent < bytesRead) {
 			if ((bytesSent = send(clientSocket, buffer + totalBytesSent,
-			    bytesRead - totalBytesSent, 0)) < 0) {
+				bytesRead - totalBytesSent, 0)) < 0) {
 				LOGE("Send data failed: %s", strerror(errno));
 				break;
 			}
@@ -351,7 +355,7 @@ int FileTransferServer::receiveFile(int clientSocket, const char *directory) {
 	StartSignalPkt startSignalPkt{};
 	startSignalPkt.start = true;
 	if ((bytesSent = send(clientSocket, &startSignalPkt,
-	    sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
+		sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
 		if (bytesSent < 0)
 			LOGE("Send start signal failed: %s", strerror(errno));
 		else
@@ -363,7 +367,7 @@ int FileTransferServer::receiveFile(int clientSocket, const char *directory) {
 	FileInfoPkt fileInfoPkt{};
 	LOGD("Receiving file info");
 	if ((bytesRecv = recv(clientSocket, &fileInfoPkt, sizeof(fileInfoPkt), 0))
-	    != sizeof(fileInfoPkt)) {
+		!= sizeof(fileInfoPkt)) {
 		if (bytesRecv)
 			LOGE("Receive file info failed: %s", strerror(errno));
 		else
@@ -381,7 +385,7 @@ int FileTransferServer::receiveFile(int clientSocket, const char *directory) {
 	}
 
 	LOGD("File name=%s size=%ld time=%ld", fileNameStr.c_str(),
-	    fileInfoPkt.size, fileInfoPkt.time);
+		fileInfoPkt.size, fileInfoPkt.time);
 
 	// Open file for writing
 	FILE *file = fopen(fileNameStr.c_str(), "wb");
@@ -392,7 +396,7 @@ int FileTransferServer::receiveFile(int clientSocket, const char *directory) {
 
 	fileCount += 1;
 	LOGI("Receiving file %d/%d name=%s size=%zu...", fileCount,
-	    totalFiles, fileNameStr.c_str(), fileInfoPkt.size);
+		totalFiles, fileNameStr.c_str(), fileInfoPkt.size);
 
 	// Receive the content of the file
 	LOGD("Receiving file content");
@@ -431,20 +435,20 @@ int FileTransferServer::receiveFile(int clientSocket, const char *directory) {
 	}
 
 	LOGI("Receive file completed %d/%d %s", fileCount, totalFiles,
-	      fileNameStr.c_str());
+		  fileNameStr.c_str());
 
 	return 0;
 }
 
 int FileTransferServer::sendFileList(int clientSocket, std::vector<std::string>
-    files) {
+	files) {
 	ssize_t bytesRecv = 0;
 
 	// Wait for client start signal
 	LOGD("Waiting for start signal");
 	StartSignalPkt startSignalPkt{};
 	if ((bytesRecv = recv(clientSocket, &startSignalPkt,
-	    sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
+		sizeof(startSignalPkt), 0)) != sizeof(startSignalPkt)) {
 		if (bytesRecv < 0)
 			LOGE("Receive start signal failed: %s", strerror(errno));
 		else
@@ -466,6 +470,47 @@ int FileTransferServer::sendFileList(int clientSocket, std::vector<std::string>
 
 	LOGI("File list sent completed");
 	return 0;
+}
+
+std::string FileTransferServer::getLocalPrivateIP() {
+	struct ifaddrs* ifaddr;
+	struct ifaddrs* ifa;
+	char ip[INET_ADDRSTRLEN];
+
+	if (getifaddrs(&ifaddr) == -1) {
+		perror("getifaddrs");
+		return "";
+	}
+
+	std::string localIP = "";
+
+	for (ifa = ifaddr; ifa != nullptr; ifa = ifa->ifa_next) {
+		if (ifa->ifa_addr == nullptr || ifa->ifa_addr->sa_family != AF_INET) {
+			continue; // Skip if no address or not IPv4
+		}
+
+		// Get IP address
+		struct sockaddr_in* sa = reinterpret_cast<struct sockaddr_in*>(ifa->ifa_addr);
+		if (inet_ntop(AF_INET, &sa->sin_addr, ip, INET_ADDRSTRLEN) == nullptr) {
+			perror("inet_ntop");
+			continue;
+		}
+
+		std::string ipStr(ip);
+
+		// Check if it falls within the private IP ranges
+		if (ipStr.find("10.") == 0 ||                // Class A private range
+			(ipStr.find("172.") == 0 && 
+				(std::stoi(ipStr.substr(4, ipStr.find('.', 4) - 4)) >= 16 &&
+				 std::stoi(ipStr.substr(4, ipStr.find('.', 4) - 4)) <= 31)) || // Class B private range
+			ipStr.find("192.168.") == 0) {          // Class C private range
+			localIP = ipStr;
+			break; // Found a private IP
+		}
+	}
+
+	freeifaddrs(ifaddr);
+	return localIP;
 }
 
 } // namespace Dex
