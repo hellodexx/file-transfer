@@ -53,7 +53,7 @@
                                     <action selector="sendButtonPressed:" destination="BYZ-38-t0r" eventType="touchDown" id="npM-jQ-FgY"/>
                                 </connections>
                             </button>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="2009*" borderStyle="roundedRect" placeholder="pattern YYYYMMDD" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Udp-ef-sAd">
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="2009*" borderStyle="roundedRect" placeholder="ex. 2012*" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Udp-ef-sAd">
                                 <rect key="frame" x="132" y="510" width="129" height="34"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
