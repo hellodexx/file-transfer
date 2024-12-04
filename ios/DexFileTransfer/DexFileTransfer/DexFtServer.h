@@ -19,15 +19,15 @@ public:
     FileTransferServer();
     ~FileTransferServer();
     void runServer();
-    void foo();
     void stopServer();
 
 private:
     void handleClient(int clientSocket);
-    int sendFile(int clientSocket, const char* filename);
     int sendFileIOS(int clientSocket, const char* fileName, PHAsset *asset);
-    int receiveFile(int clientSocket, const char* directory);
-    int sendFileList(int clientSocket, std::vector<std::string> files);
+    int receiveFileIOS(int clientSocket, const char* directory);
+    int sendFileListIOS(int clientSocket, std::map<std::string, PHAsset *> assetsMap);
+    void saveFileToPhotosIOS(const char* filePath);
+    std::map<std::string, PHAsset *> fetchMediaMatchingPatternMap(const std::string& pattern);
     
     int serverSocket;
     unsigned totalFiles = 0;

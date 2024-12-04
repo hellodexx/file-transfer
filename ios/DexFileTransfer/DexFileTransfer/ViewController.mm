@@ -15,7 +15,7 @@
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *localIp;
-@property (weak, nonatomic) IBOutlet UISwitch *startSwitch;
+@property (weak, nonatomic) IBOutlet UISwitch *serverSwitch;
 @property (weak, nonatomic) IBOutlet UITextField *ftServerIp;
 @property (weak, nonatomic) IBOutlet UITextField *filePattern;
 @property (weak, nonatomic) IBOutlet UITextView *infoMessage;
@@ -48,9 +48,7 @@ Dex::FileTransferServer ftServer;
             }
         }];
     
-    // Clear local ip label
     _localIp.text = @"";
-    
     _infoMessage.text = @"";
     
     // Add tap gesture recognizer to dismiss keyboard
@@ -60,31 +58,40 @@ Dex::FileTransferServer ftServer;
     [self.view addGestureRecognizer:tap];
 }
 
-- (IBAction)startSwitchChanged:(id)sender {
-    NSLog(@"startSwitchChanged %d", _startSwitch.isOn);
+- (IBAction)serverSwitchChanged:(id)sender {
+    NSLog(@"serverSwitchChanged %d", _serverSwitch.isOn);
     
-    if (_startSwitch.isOn) {
-        NSLog(@"Turning on");
-        
+    if (_serverSwitch.isOn) {
+        NSLog(@"Turning on server");
         self.infoMessage.text = @"Server listening...";
+        // Disable the client send mechanism
+        self.sendButton.enabled = false;
+        self.ftServerIp.enabled = false;
+        self.filePattern.enabled = false;
         
         // Retrieve and display the private IP address
         NSString *privateIPAddress = [self getPrivateIPAddress];
         NSLog(@"Private IP Address: %@", privateIPAddress);
-        _localIp.text = privateIPAddress;
+        self.localIp.text = privateIPAddress;
         
+        // Run server in a separate thread
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             ftServer.runServer();
             
+            // Do something after the blocking function completes
             dispatch_async(dispatch_get_main_queue(), ^{
-                NSLog(@"UI can be updated after blocking function completes");
+//                NSLog(@"UI can be updated after blocking function completes");
             });
         });
     } else {
-        NSLog(@"Turning off");
+        NSLog(@"Turning off server");
         ftServer.stopServer();
-        _localIp.text = @"";
+        self.localIp.text = @"";
         self.infoMessage.text = @"Server stopped";
+        // Enable the client send mechanism
+        self.sendButton.enabled = true;
+        self.ftServerIp.enabled = true;
+        self.filePattern.enabled = true;
     }
 }
 
@@ -128,9 +135,11 @@ Dex::FileTransferServer ftServer;
     printf("sendButtonPressed [%s] [%s]\n", cftServerIp.c_str(), cfilePattern.c_str());
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        // Send file in a separate thread
         Dex::FileTransferClient ftClient;
         int result = ftClient.runClient(cftServerIp.c_str(), Command::PUSH, cfilePattern.c_str());
         
+        // Do something after the blocking function completes
         dispatch_async(dispatch_get_main_queue(), ^{
             printf("Send complete!\n");
             self.sendButton.enabled = true;
