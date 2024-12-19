@@ -10,10 +10,20 @@
         android:id="@+id/sample_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.234" />
+
+    <Switch
+        android:id="@+id/ftServerSwitch"
+        android:layout_width="98dp"
+        android:layout_height="53dp"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="60dp"
+        android:text="Receive"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sample_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

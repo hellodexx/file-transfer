@@ -14,6 +14,8 @@ import kotlinx.coroutines.launch
 
 import android.net.wifi.WifiManager
 import android.text.format.Formatter
+import android.widget.Switch
+import android.widget.Toast
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -29,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         // Example of a call to a native method
 //        binding.sampleText.text = stringFromJNI()
         val localIpAddress = getLocalIpAddress(this)
-        binding.sampleText.text = "Local IP Address: $localIpAddress"
+//        binding.sampleText.text = "Local IP Address: $localIpAddress"
 
         requestPermissions(arrayOf(
             Manifest.permission.READ_MEDIA_IMAGES,
@@ -48,7 +50,23 @@ class MainActivity : AppCompatActivity() {
 //        }
 
         intent = Intent(this, DexFileTransferService::class.java)
-        startForegroundService(intent)
+
+        val switchButton: Switch = findViewById(R.id.ftServerSwitch)
+        switchButton.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                // Action when switched ON
+                Toast.makeText(this, "DexFT Server is ON", Toast.LENGTH_SHORT).show()
+                binding.sampleText.text = "Server local IP: $localIpAddress"
+                // Start the service when the switch is ON
+                startForegroundService(intent)
+            } else {
+                // Action when switched OFF
+                Toast.makeText(this, "DexFT Server is OFF", Toast.LENGTH_SHORT).show()
+                binding.sampleText.text = "Server is OFF"
+                // Stop the service when the switch is OFF
+                stopService(intent)
+            }
+        }
     }
 
     fun getLocalIpAddress(context: Context): String {
